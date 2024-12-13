@@ -11,9 +11,8 @@ import createLocalStorage from './localstorage.js';
 import initializeEvents from './events.js';
 
 globalThis.global = globalThis;
-
-
-console.log('nrsc', Object.keys(nrsc));
+console.log('@napi-rs/canvas capabilities', Object.keys(nrsc));
+console.log('@kmamal/sdl capabilities', Object.keys(sdl));
 let canvas;
 
 globalThis.window = globalThis;
@@ -46,14 +45,9 @@ globalThis.document = document;
 globalThis.screen = {};
 globalThis.XMLHttpRequest = XMLHttpRequest;
 
-
-console.log('sdl', Object.keys(sdl));
-
-// globalThis.loadImage = loadImage;
 globalThis.sdl = sdl;
 
 let rafCallbackId = 1;
-// let rafCallbacks = [];
 let currentRafCallback;
 
 function requestAnimationFrame(callback) {
@@ -62,7 +56,6 @@ function requestAnimationFrame(callback) {
     id: rafCallbackId,
     callback,
   };
-  // console.log('requestAnimationFrame add:', rafCallbackId);
   return rafCallbackId;
 };
 
@@ -72,11 +65,9 @@ function cancelAnimationFrame(id) {
   }
 };
 
-
 globalThis.requestAnimationFrame = requestAnimationFrame;
 globalThis.cancelAnimationFrame = cancelAnimationFrame;
 console.log('getting options...');
-
 
 const options = getOptions();
 
@@ -84,18 +75,35 @@ console.log('options', options);
 
 const romFile = options.Rom;
 const romDir = path.dirname(romFile);
-const gameFile = path.join(romDir, 'game.js');
+let gameFile;
+const tryOrder = [
+  ['game.js'],
+  ['src', 'game.js'],
+  ['index.js'],
+  ['src', 'index.js'],
+  ['main.js'],
+  ['src', 'main.js'],
+]
+for (const order of tryOrder) {
+  const tryGameFile = path.join(romDir, ...order);
+  if (fs.existsSync(tryGameFile)) {
+    gameFile = tryGameFile;
+    break;
+  }
+}
+if (!gameFile) {
+  console.error('game.js file not found');
+  process.exit(1);
+}
+
 console.log('gameFile', gameFile);
 const romName = path.basename(romDir);
-console.log('options', options, 'romFile', romFile, 'romDir', romDir, 'romName', romName);
-// console.log('args', process.argv);
+console.log('options', options, 'gameFile', gameFile, 'romDir', romDir, 'romName', romName);
 
-// console.log(Module.globalPaths);
 if (fs.existsSync(path.join(romDir, 'node_modules'))) {
   Module.globalPaths.push(path.join(romDir, 'node_modules'));
   console.log(Module.globalPaths);
 }
-// globalThis.Image = createImageClass(romDir);
 globalThis.loadImage = createLoadImage(romDir);
 
 const gameWidth = 640;
@@ -139,9 +147,8 @@ async function main() {
       };
     };
   }
-  // let canvas = new Canvas(gameWidth, gameHeight);
   const ctx = canvas.getContext('2d');
-  ctx.imageSmoothingEnabled = false;
+  ctx.imageSmoothingEnabled = true;
   canvas.name = 'game canvas';
 
 
@@ -151,13 +158,10 @@ async function main() {
   let paintPosY = 0;
   let scaledGameWidth = 0;
   let scaledGameHeight = 0;
-  let scale = 1;
   let callCount = 0;
-  let imageDataTime = 0;
   let imageDrawTime = 0;
   let callbackTime = 0;
   let windowRenderTime = 0;
-  let bufferCreateTime = 0;
 
   function launcherDraw() {
   
@@ -166,11 +170,9 @@ async function main() {
       stride = windowWidth * 4;
       console.log('windowWidth', windowWidth, 'windowWidth', windowWidth);
       backCanvas = createCanvas(windowWidth, windowWidth);
-      // backCanvas = new Canvas(windowWidth, windowHeight);
     }
     const backCtx = backCanvas.getContext('2d');
-    backCtx.imageSmoothingEnabled = false;
-    // const buffer = Buffer.from(canvas.data);
+    backCtx.imageSmoothingEnabled = true;
     
     if (!scaledGameWidth) {
       if ((windowWidth >= gameWidth ) && (windowHeight >= gameHeight)) {
@@ -182,36 +184,22 @@ async function main() {
         scaledGameHeight = gameHeight * gameScale;
         paintPosX = (windowWidth - scaledGameWidth) / 2;
         paintPosY = (windowHeight - scaledGameHeight) / 2;
-        // console.log('scale', scale, paintPosX, paintPosY);
         backCtx.strokeStyle = 'white';
         backCtx.lineWidth = 1;
-        backCtx.imageSmoothingEnabled = false;
+        backCtx.imageSmoothingEnabled = true;
         backCtx.strokeRect(paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
       }
     }
     
-    // backCtx.drawIntegerScaled(canvas, paintPosX, paintPosY, gameScale);
     const startImageDrawTime = performance.now();
     backCtx.drawImage(canvas, paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
     imageDrawTime+= (performance.now() - startImageDrawTime);
-    // console.log('backCanvas paint x,y', paintPosX, paintPosY, 'backCanvas w, h', backCanvas.width, backCanvas.height, 'scaled game w, h', scaledGameWidth, scaledGameHeight,'scale', gameScale);
     if (windowWidth < canvas.width || windowHeight < canvas.height) {
-      console.log('NOT rednering to window', windowWidth, windowHeight, backCanvas.data.length, scale, paintPosX, paintPosY);
-      const tempBackCanvas = createCanvas(windowWidth, windowHeight);
-      stride = tempBackCanvas.width * 4;
-      const tempBackCtx = tempBackCanvas.getContext('2d');
-      window.render(tempBackCanvas.width, tempBackCanvas.height, stride, 'rgba32', Buffer.from(tempBackCtx.getImageData(0, 0, tempBackCanvas.width, tempBackCanvas.height).data));
+      console.log('NOT rednering to window', windowWidth, windowHeight);
       return;
     }
-    const startImageDataTime = performance.now();
-    const imageData = backCtx.getImageData(0, 0, backCanvas.width, backCanvas.height);
-    imageDataTime+= (performance.now() - startImageDataTime);
+    const buffer = Buffer.from(backCanvas.data().buffer);
     
-    const startBufferCreateTime = performance.now();
-    // console.log('imagedata', imageData.data.buffer);
-    const buffer = Buffer.from(imageData.data.buffer);
-    bufferCreateTime+= (performance.now() - startBufferCreateTime);
-
     const startWindowRenderTime = performance.now();
     appWindow.render(backCanvas.width, backCanvas.height, stride, 'rgba32', buffer);
     windowRenderTime+= (performance.now() - startWindowRenderTime);
@@ -237,8 +225,6 @@ async function main() {
   appWindow
     .on('resize', resize)
     .on('expose', resize)
-
-
   
   let lastTime = performance.now();
   function launcherLoop() {
@@ -251,7 +237,6 @@ async function main() {
         process.exit(0);
       }
     }
-
 
     // console.log('currentRafCallback', currentRafCallback);
     const callbackStartTime = performance.now();
@@ -271,27 +256,26 @@ async function main() {
   initGamepads();
   launcherLoop();
 
-  // Log the FPS (calls per second)
+  // Log the FPS (frames per second)
   setInterval(() => {
-    console.log(`${callCount} calls per second`,
-      backCanvas.width,
-      backCanvas.height,
-      'imagedata', imageDataTime / callCount,
-      'imagedrawtime', imageDrawTime / callCount,
-      'game callback', callbackTime / callCount,
-      'window render', windowRenderTime / callCount,
-      'buffercreate' , bufferCreateTime / callCount,
-    );
-    callCount = 0; // Reset the counter
-    imageDataTime = 0;
+    // somtimes console.log throws an error ¯\_(ツ)_/¯
+    try {
+      console.log(callCount, 'FPS',
+        'window.WxH', backCanvas.width, backCanvas.height,
+        'drawImage', Number(imageDrawTime / callCount).toFixed(5),
+        'game.callback', Number(callbackTime / callCount).toFixed(5),
+        'game.scale', gameScale,
+        'window.render', Number(windowRenderTime / callCount).toFixed(5),
+      );
+    } catch (e) {
+      console.error(e);
+    }
+    // Reset the counters
+    callCount = 0;
     imageDrawTime = 0;
     callbackTime = 0;
     windowRenderTime = 0;
-    bufferCreateTime = 0;
   }, 1000);
-
 }
 
 main();
-
-

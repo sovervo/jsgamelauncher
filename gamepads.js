@@ -105,9 +105,10 @@ const stdJoystickMapping = [
 
 function createGamepad(device, _sdltype) {
   let _jsMap = stdJoystickMapping;
-  if (['anbernic rg40xx-v controller', 'deeplay-keys'].includes(String(device.name).toLowerCase())) {
+  const lcDev = String(device.name).toLowerCase();
+  if (lcDev.startsWith('anbernic ') || ['deeplay-keys'].includes(lcDev)) {
     _jsMap = deeplayJSMap;
-  } else if (String(device.name).toLowerCase().startsWith('anbernic-keys')) {
+  } else if (lcDev.startsWith('anbernic-keys')) {
     _jsMap = anbernicJSMap;
   }
   return {
