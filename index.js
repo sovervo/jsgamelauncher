@@ -105,7 +105,6 @@ if (fs.existsSync(path.join(romDir, 'node_modules'))) {
 }
 globalThis.loadImage = createLoadImage(romDir);
 globalThis.Image = createImageClass(romDir);
-glot
 
 const gameWidth = 640;
 const gameHeight = 480;
