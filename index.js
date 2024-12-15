@@ -3,9 +3,10 @@ import path from 'path';
 import Module from 'module';
 import XMLHttpRequest from 'xhr-shim';
 import fs from 'fs';
-import nrsc, { createCanvas, ImageData } from '@napi-rs/canvas';
+import nrsc, { ImageData } from '@napi-rs/canvas';
 import getOptions from './options.js';
 import { initGamepads } from './gamepads.js';
+import { createCanvas, OffscreenCanvas } from './canvas.js';
 import { createImageClass, createLoadImage } from './image.js';
 import createLocalStorage from './localstorage.js';
 import initializeEvents from './events.js';
@@ -18,11 +19,6 @@ let canvas;
 globalThis.window = globalThis;
 globalThis.HTMLCanvasElement = nrsc.Canvas;
 globalThis.ImageData = ImageData;
-class OffscreenCanvas {
-  constructor(width, height) {
-    return createCanvas(width, height);
-  }
-}
 globalThis.OffscreenCanvas = OffscreenCanvas;
 const document = {
   getElementById: (id) => {
@@ -31,7 +27,10 @@ const document = {
   },
   createElement: (name) => {
     if (name === 'canvas') {
-      return canvas;
+      return createCanvas(300, 150);
+    }
+    if (name === 'image' && globalThis.Image) {
+      return new globalThis.Image();
     }
     return {};
   },
@@ -105,6 +104,8 @@ if (fs.existsSync(path.join(romDir, 'node_modules'))) {
   console.log(Module.globalPaths);
 }
 globalThis.loadImage = createLoadImage(romDir);
+globalThis.Image = createImageClass(romDir);
+glot
 
 const gameWidth = 640;
 const gameHeight = 480;
