@@ -148,7 +148,7 @@ async function main() {
     };
   }
   const ctx = canvas.getContext('2d');
-  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingEnabled = false;
   canvas.name = 'game canvas';
 
 
@@ -172,7 +172,7 @@ async function main() {
       backCanvas = createCanvas(windowWidth, windowWidth);
     }
     const backCtx = backCanvas.getContext('2d');
-    backCtx.imageSmoothingEnabled = true;
+    backCtx.imageSmoothingEnabled = false;;
     
     if (!scaledGameWidth) {
       if ((windowWidth >= gameWidth ) && (windowHeight >= gameHeight)) {
@@ -186,7 +186,7 @@ async function main() {
         paintPosY = (windowHeight - scaledGameHeight) / 2;
         backCtx.strokeStyle = 'white';
         backCtx.lineWidth = 1;
-        backCtx.imageSmoothingEnabled = true;
+        backCtx.imageSmoothingEnabled = false;;
         backCtx.strokeRect(paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
       }
     }
@@ -263,6 +263,7 @@ async function main() {
       console.log(callCount, 'FPS',
         'window.WxH', backCanvas.width, backCanvas.height,
         'drawImage', Number(imageDrawTime / callCount).toFixed(5),
+        'game stretched', scaledGameWidth, scaledGameHeight,
         'game.callback', Number(callbackTime / callCount).toFixed(5),
         'game.scale', gameScale,
         'window.render', Number(windowRenderTime / callCount).toFixed(5),
