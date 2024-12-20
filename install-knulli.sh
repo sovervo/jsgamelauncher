@@ -105,10 +105,10 @@ if my_distro_check; then
   fi
   mv jsgamelauncher-0.1.0 jsgamelauncher
   mv jsgamelauncher ~/jsgamelauncher
-  chmod +x ~/jsgameslauncher/knulli/run.sh
-  cp ~/jsgameslauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/
+  chmod +x ~/jsgamelauncher/knulli/run.sh
+  cp ~/jsgamelauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/
   mkdir /userdata/roms/jsgames
-  cd ~/jsgameslauncher
+  cd ~/jsgamelauncher
   npm install
   my_echo "=> INSTALL SUCCESSFUL!"
 else
