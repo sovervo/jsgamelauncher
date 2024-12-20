@@ -102,9 +102,12 @@ if my_distro_check; then
   if [ -d "~/jsgamelauncher" ]; then
     my_echo "=> Folder ~/jsgamelauncher exists. Deleting..."
     rm -rf ~/jsgamelauncher
+  else 
+    my_echo "=> Folder ~/jsgamelauncher does not exist. Copying ..."
   fi
-  mv jsgamelauncher-0.1.0 jsgamelauncher
-  mv jsgamelauncher ~/jsgamelauncher
+  mkdir ~/jsgamelauncher
+  mv -r jsgamelauncher-0.1.0/* ~/jsgamelauncher/
+  rm mydownload.zip
   chmod +x ~/jsgamelauncher/knulli/run.sh
   cp ~/jsgamelauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/
   mkdir /userdata/roms/jsgames
