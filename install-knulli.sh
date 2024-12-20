@@ -98,8 +98,13 @@ unzip mydownload.zip
 
 if my_distro_check; then
   my_echo "=> This is a knulli device, so I'm moving files around! And running npm install in the jsgamelauncher directory"
-  rm -r ~/jsgamelauncher
-  mv jsgamelauncher-0.1.0 ~/jsgamelauncher
+  
+  if [ -d "~/jsgamelauncher" ]; then
+    my_echo "=> Folder ~/jsgamelauncher exists. Deleting..."
+    rm -rf ~/jsgamelauncher
+  fi
+  mv jsgamelauncher-0.1.0 jsgamelauncher
+  mv jsgamelauncher ~/jsgamelauncher
   chmod +x ~/jsgameslauncher/knulli/run.sh
   cp ~/jsgameslauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/
   mkdir /userdata/roms/jsgames
