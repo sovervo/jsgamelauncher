@@ -7,6 +7,14 @@ my_has() {
   type "$1" > /dev/null 2>&1
 }
 
+my_distro_check() {
+  if grep -q "knulli" /etc/issue; then
+    return 0  # True
+  else
+    return 1  # False
+  fi
+}
+
 my_echo() {
   command printf %s\\n "$*" 2>/dev/null
 }
@@ -50,11 +58,11 @@ my_grep() {
 }
 
 # check to see if I'm running on a knulli device
-if my_has "/usr/bin/knulli-info"; then
-  my_echo "=> This is a knulli device"
+if my_distro_check; then
+  my_echo "=> This is a knulli device, /etc/issue says so"
 else
-  my_echo "=> This NOT is a knulli device, EXITING . . . . after debugging!"
-  # exit 1
+  my_echo "=> This NOT is a knulli device, EXITING!!"
+  exit 1
 fi
 
 # NVM can't update the .bash_profile if one doesn't exist
@@ -88,20 +96,38 @@ curl -o mydownload.zip -L https://github.com/monteslu/jsgamelauncher/archive/ref
 unzip mydownload.zip
 
 
-if my_has "/usr/bin/knulli-info"; then
+if my_distro_check; then
   my_echo "=> This is a knulli device, so I'm moving files around! And running npm install in the jsgamelauncher directory"
-  # rm -r ~/jsgamelauncher
-  mv jsgamelauncher-0.1.0 ~/jsgamelauncher
-  chmod +x ~/jsgameslauncher/knulli/run.sh
-  cp ~/jsgameslauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/
-  mkdir /userdata/roms/jsgames
-  cd ~/jsgameslauncher
+  
+  if [ -d "$HOME/jsgamelauncher" ]; then
+    my_echo "=> Folder ~/jsgamelauncher exists. Deleting..."
+    rm -rf ~/jsgamelauncher
+  else 
+    my_echo "=> Folder ~/jsgamelauncher does not exist. Copying ..."
+  fi
+  mkdir ~/jsgamelauncher
+  mv jsgamelauncher-0.1.0/* ~/jsgamelauncher/
+  rm mydownload.zip
+  chmod +x ~/jsgamelauncher/knulli/run.sh
+  cp ~/jsgamelauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/
+
+
+
+  if [ -d "/userdata/roms/jsgames" ]; then
+    my_echo "=> Folder /userdata/roms/jsgames exists, no need to create it."
+  else 
+    mkdir /userdata/roms/jsgames
+  fi
+  
+  cd ~/jsgamelauncher
   npm install
+  my_echo "=> INSTALL SUCCESSFUL!"
+  cd ~
 else
-    my_echo "=> This NOT is a knulli device, so I'm not moving files around!"
+  my_echo "=> my_distro_check says this is NOT is a knulli device, so I'm not moving files around!"
+  my_echo "=> INSTALL (sorta)SUCCESSFUL!"
 fi
 
-my_echo "=> INSTALL SUCCESSFUL!"
 my_reset
 
 } # this ensures the entire script is downloaded #
