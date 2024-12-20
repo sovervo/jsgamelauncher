@@ -20,21 +20,22 @@ my_reset() {
 }
 
 
-# Ask about installing sample games
-read -r -p "Do you want to copy/update the sample games (in addition to enabling the launcher)? (yes/no): " answer
+# this breaks the script with curl -o- . . . will figure out another way to do this later
+# # Ask about installing sample games
+# read -r -p "Do you want to copy/update the sample games (in addition to enabling the launcher)? (yes/no): " answer
 
-# Convert the answer to lowercase for easier comparison
-answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+# # Convert the answer to lowercase for easier comparison
+# answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
 
-# Change directory based on the answer
-if [[ "$answer" == "yes" || "$answer" == "y" ]]; then
-  my_echo "=> In the future, I'll copy/update the sample games"
-elif [[ "$answer" == "no" || "$answer" == "n" ]]; then
-  my_echo "=> In the future, I won't copy/update the sample games"
-else
-  my_echo "Invalid input. Please answer 'yes' or 'no' next time!"
-  exit 1
-fi
+# # Change directory based on the answer
+# if [[ "$answer" == "yes" || "$answer" == "y" ]]; then
+#   my_echo "=> In the future, I'll copy/update the sample games"
+# elif [[ "$answer" == "no" || "$answer" == "n" ]]; then
+#   my_echo "=> In the future, I won't copy/update the sample games"
+# else
+#   my_echo "Invalid input. Please answer 'yes' or 'no' next time!"
+#   exit 1
+# fi
 
 my_echo "=> STARTING INSTALL"
 
