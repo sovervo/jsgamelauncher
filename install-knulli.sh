@@ -106,7 +106,7 @@ if my_distro_check; then
     my_echo "=> Folder ~/jsgamelauncher does not exist. Copying ..."
   fi
   mkdir ~/jsgamelauncher
-  mv -r jsgamelauncher-0.1.0/* ~/jsgamelauncher/
+  mv jsgamelauncher-0.1.0/* ~/jsgamelauncher/
   rm mydownload.zip
   chmod +x ~/jsgamelauncher/knulli/run.sh
   cp ~/jsgamelauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/
