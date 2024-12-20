@@ -7,6 +7,14 @@ my_has() {
   type "$1" > /dev/null 2>&1
 }
 
+my_distro_check() {
+  if grep -q "knulli" /etc/issue; then
+    return 0  # True
+  else
+    return 1  # False
+  fi
+}
+
 my_echo() {
   command printf %s\\n "$*" 2>/dev/null
 }
@@ -50,7 +58,7 @@ my_grep() {
 }
 
 # check to see if I'm running on a knulli device
-if my_has "/usr/bin/knulli-info"; then
+if my_distro_check; then
   my_echo "=> This is a knulli device"
 else
   my_echo "=> This NOT is a knulli device, EXITING . . . . after debugging!"
@@ -88,7 +96,7 @@ curl -o mydownload.zip -L https://github.com/monteslu/jsgamelauncher/archive/ref
 unzip mydownload.zip
 
 
-if my_has "/usr/bin/knulli-info"; then
+if my_distro_check; then
   my_echo "=> This is a knulli device, so I'm moving files around! And running npm install in the jsgamelauncher directory"
   # rm -r ~/jsgamelauncher
   mv jsgamelauncher-0.1.0 ~/jsgamelauncher
@@ -97,11 +105,12 @@ if my_has "/usr/bin/knulli-info"; then
   mkdir /userdata/roms/jsgames
   cd ~/jsgameslauncher
   npm install
+  my_echo "=> INSTALL SUCCESSFUL!"
 else
-    my_echo "=> This NOT is a knulli device, so I'm not moving files around!"
+  my_echo "=> my_distro_check says this is NOT is a knulli device, so I'm not moving files around!"
+  my_echo "=> INSTALL (sorta)SUCCESSFUL!"
 fi
 
-my_echo "=> INSTALL SUCCESSFUL!"
 my_reset
 
 } # this ensures the entire script is downloaded #
