@@ -59,10 +59,10 @@ my_grep() {
 
 # check to see if I'm running on a knulli device
 if my_distro_check; then
-  my_echo "=> This is a knulli device"
+  my_echo "=> This is a knulli device, /etc/issue says so"
 else
-  my_echo "=> This NOT is a knulli device, EXITING . . . . after debugging!"
-  # exit 1
+  my_echo "=> This NOT is a knulli device, EXITING!!"
+  exit 1
 fi
 
 # NVM can't update the .bash_profile if one doesn't exist
