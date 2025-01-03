@@ -225,7 +225,7 @@ async function main() {
   let callbackTime = 0;
   let windowRenderTime = 0;
 
-  function launcherDraw() {
+  async function launcherDraw() {
     gameWidth = canvas.width;
     gameHeight = canvas.height;
   
@@ -267,7 +267,7 @@ async function main() {
     const buffer = Buffer.from(backCanvas.data().buffer);
     
     const startWindowRenderTime = performance.now();
-    appWindow.render(backCanvas.width, backCanvas.height, stride, 'rgba32', buffer);
+    await appWindow.render(backCanvas.width, backCanvas.height, stride, 'rgba32', buffer);
     windowRenderTime+= (performance.now() - startWindowRenderTime);
   }
 
@@ -280,8 +280,8 @@ async function main() {
     .on('resize', resize)
     .on('expose', resize)
   
-  let lastTime = performance.now();
-  function launcherLoop() {
+  function launcherLoop(loopTime = 16) {
+    const startLoopTime = performance.now();
     callCount++;
     const gamepads = globalThis.navigator.getGamepads();
     if (gamepads[0]) {
@@ -292,19 +292,17 @@ async function main() {
       }
     }
 
-    // console.log('currentRafCallback', currentRafCallback);
     const callbackStartTime = performance.now();
     if (currentRafCallback) {
-      const currentTime = performance.now();
       let thisCallback = currentRafCallback;
       currentRafCallback = null;
-      thisCallback.callback(currentTime - lastTime);
-      lastTime = currentTime;
+      thisCallback.callback(loopTime);
     }
     callbackTime+= (performance.now() - callbackStartTime);
 
     launcherDraw();
-    setImmediate(launcherLoop);
+    const endLoopTime = performance.now();
+    setImmediate(() => launcherLoop(endLoopTime - startLoopTime));
   }
   
   initGamepads();
