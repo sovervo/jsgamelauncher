@@ -54,6 +54,7 @@ export default function initialize(appWindow) {
   };
 
   globalThis.document.addEventListener = globalThis.addEventListener;
+  globalThis.document.body.addEventListener = globalThis.addEventListener;
 
   globalThis.removeEventListener = function (type, listener) {
     if (type === 'keydown') {
@@ -64,5 +65,5 @@ export default function initialize(appWindow) {
   }
 
   globalThis.document.removeEventListener = globalThis.removeEventListener;
-
+  globalThis.document.body.removeEventListener = globalThis.removeEventListener;
 }
