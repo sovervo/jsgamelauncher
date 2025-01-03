@@ -7,8 +7,8 @@ A compatibily layer for Javscript games to run WITHOUT a browser or electron usi
 - canvas
 - gamepads
 - keyboard
-- mouse
 - localStorage
+- web audio
 
 ## Running on a desktop OS
 

@@ -190,7 +190,7 @@ function addJoystick(device) {
       // console.log('JOYSTICK event', type, e);
       if (type === 'buttonDown') {
         if (gp._jsMap[e.button] !== undefined) {
-          console.log('button down', e.button, gp._jsMap[e.button]);
+          // console.log('button down', e.button, gp._jsMap[e.button]);
           const btn = gp.buttons[gp._jsMap[e.button]];
           if (btn) {
             btn.pressed = true;
@@ -199,7 +199,7 @@ function addJoystick(device) {
         }
       } else if (type === 'buttonUp') {
         if (gp._jsMap[e.button] !== undefined) {
-          console.log('button up', e.button, gp._jsMap[e.button]);
+          // console.log('button up', e.button, gp._jsMap[e.button]);
           const btn = gp.buttons[gp._jsMap[e.button]];
           if (btn) {
             btn.pressed = false;

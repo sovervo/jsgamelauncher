@@ -4,6 +4,7 @@ export function createCanvas(width, height) {
   const canvas = npcc(width, height);
   const baseGetContext = canvas.getContext.bind(canvas);
   let ctx;
+  canvas.style = {};
   canvas.getContext = function getContext(type) {
     // TODO handle webgl
     if (!ctx) {

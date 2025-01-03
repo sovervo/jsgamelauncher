@@ -1,7 +1,6 @@
 import sdl from '@kmamal/sdl';
 import path from 'path';
 import Module from 'module';
-import XMLHttpRequest from 'xhr-shim';
 import fs from 'fs';
 import nrsc, { ImageData } from '@napi-rs/canvas';
 import getOptions from './options.js';
@@ -10,10 +9,43 @@ import { createCanvas, OffscreenCanvas } from './canvas.js';
 import { createImageClass, createLoadImage } from './image.js';
 import createLocalStorage from './localstorage.js';
 import initializeEvents from './events.js';
+import { AudioContext, AudioDestinationNode, OscillatorNode, GainNode, AudioBuffer } from 'webaudio-node';
+import createFetch from './fetch.js';
+import createXMLHttpRequest from './xhr.js';
+
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  if (err.code === 'EPIPE') {
+    // console.log('EPIPE');
+    // process.exit(0);
+    return;
+  }
+  // Perform cleanup or logging here
+  process.exit(1); // Optional: Exit the process gracefully
+});
+
+const internalLog = console.log.bind(console);
+const internalError = console.error.bind(console);
+console.log = (...args) => {
+  try {
+    internalLog(...args);
+  } catch (e) {
+    // do nothing
+  }
+}
+console.error = (...args) => {
+  try {
+    internalError(...args);
+  } catch (e) {
+    // do nothing
+  }
+}
 
 globalThis.global = globalThis;
-console.log('@napi-rs/canvas capabilities', Object.keys(nrsc));
-console.log('@kmamal/sdl capabilities', Object.keys(sdl));
+console.log('LAUNCHING....');
+// console.log('@napi-rs/canvas capabilities', Object.keys(nrsc));
+// console.log('@kmamal/sdl capabilities', Object.keys(sdl));
 let canvas;
 
 globalThis.window = globalThis;
@@ -22,7 +54,7 @@ globalThis.ImageData = ImageData;
 globalThis.OffscreenCanvas = OffscreenCanvas;
 const document = {
   getElementById: (id) => {
-    console.log('document.getElementById', id, canvas);
+    // console.log('document.getElementById', id, canvas);
     return canvas;
   },
   createElement: (name) => {
@@ -42,7 +74,12 @@ const document = {
 };
 globalThis.document = document;
 globalThis.screen = {};
-globalThis.XMLHttpRequest = XMLHttpRequest;
+// web audio
+globalThis.AudioContext = AudioContext;
+globalThis.AudioDestinationNode = AudioDestinationNode;
+globalThis.OscillatorNode = OscillatorNode;
+globalThis.GainNode = GainNode;
+globalThis.AudioBuffer = AudioBuffer;
 
 globalThis.sdl = sdl;
 
@@ -66,11 +103,11 @@ function cancelAnimationFrame(id) {
 
 globalThis.requestAnimationFrame = requestAnimationFrame;
 globalThis.cancelAnimationFrame = cancelAnimationFrame;
-console.log('getting options...');
+// console.log('getting options...');
 
 const options = getOptions();
 
-console.log('options', options);
+// console.log('options', options);
 
 const romFile = options.Rom;
 const romDir = path.dirname(romFile);
@@ -101,30 +138,58 @@ console.log('options', options, 'gameFile', gameFile, 'romDir', romDir, 'romName
 
 if (fs.existsSync(path.join(romDir, 'node_modules'))) {
   Module.globalPaths.push(path.join(romDir, 'node_modules'));
-  console.log(Module.globalPaths);
+  // console.log(Module.globalPaths);
 }
+console.log('creating rom specific globals', romDir);
 globalThis.loadImage = createLoadImage(romDir);
 globalThis.Image = createImageClass(romDir);
+globalThis.fetch = createFetch(romDir);
+globalThis.XMLHttpRequest = createXMLHttpRequest(romDir);
+globalThis.localStorage = await createLocalStorage(romName);
 
-const gameWidth = 640;
-const gameHeight = 480;
+
+let gameWidth = 640;
+let gameHeight = 480;
+let prevGameWidth = gameWidth;
+let prevGameHeight = gameHeight;
 let stride = 0;
 let gameScale = 1;
 let backCanvas;
+let windowExp = false;
+let appWindow;
+let scaledGameWidth = 0;
+let scaledGameHeight = 0;
+
+const resize = () => {
+  const { pixelWidth, pixelHeight } = appWindow;
+  stride = pixelWidth * 4;
+  backCanvas = createCanvas(pixelWidth, pixelHeight);
+  const backCtx = backCanvas.getContext('2d');
+  backCtx.imageSmoothingEnabled = false;
+  backCtx.fillStyle = 'white';
+  const fontSize = pixelWidth / 25;
+  backCtx.font = `${fontSize}px Arial`;
+  backCtx.fillText('Loading...', pixelWidth / 2 - fontSize * 5, pixelHeight / 2);
+  appWindow.render(pixelWidth, pixelHeight, stride, 'rgba32', Buffer.from(backCanvas.data().buffer));
+  // backCanvas = new Canvas(pixelWidth, pixelHeight);
+  console.log('resize', pixelWidth, pixelHeight);
+  backCanvas.name = 'backCanvas';
+  scaledGameWidth = 0;
+  scaledGameHeight = 0;
+}
 
 
 async function main() {
-  globalThis.localStorage = await createLocalStorage(romName);
-  globalThis.Image = createImageClass(romDir);
   const fullscreen = !!options.Fullscreen;
   console.log('fullscreen', fullscreen);
-  const appWindow = sdl.video.createWindow({ resizable: true, fullscreen });
-  appWindow.setTitle('canvas game');
-  initializeEvents(appWindow);
+  appWindow = sdl.video.createWindow({ resizable: true, fullscreen });
+
   setTimeout(() => {
-    resize();
+    appWindow.setTitle('canvas game');
     appWindow.setFullscreen(fullscreen);
-  }, 100);
+    resize();
+  }, 10);
+  initializeEvents(appWindow);
 
   canvas = createCanvas(gameWidth, gameHeight);
   if (!canvas.addEventListener) {
@@ -148,22 +213,21 @@ async function main() {
     };
   }
   const ctx = canvas.getContext('2d');
-  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingEnabled = false;
   canvas.name = 'game canvas';
-
 
   await import(gameFile);
 
   let paintPosX = 0;
   let paintPosY = 0;
-  let scaledGameWidth = 0;
-  let scaledGameHeight = 0;
   let callCount = 0;
   let imageDrawTime = 0;
   let callbackTime = 0;
   let windowRenderTime = 0;
 
-  function launcherDraw() {
+  async function launcherDraw() {
+    gameWidth = canvas.width;
+    gameHeight = canvas.height;
   
     const { pixelWidth: windowWidth, pixelHeight: windowHeight } = appWindow;
     if (!backCanvas) {
@@ -172,11 +236,13 @@ async function main() {
       backCanvas = createCanvas(windowWidth, windowWidth);
     }
     const backCtx = backCanvas.getContext('2d');
-    backCtx.imageSmoothingEnabled = true;
+    backCtx.imageSmoothingEnabled = false;
     
-    if (!scaledGameWidth) {
+    if (!scaledGameWidth || prevGameWidth !== gameWidth || prevGameHeight !== gameHeight) {
+      prevGameWidth = gameWidth;
+      prevGameHeight = gameHeight;
       if ((windowWidth >= gameWidth ) && (windowHeight >= gameHeight)) {
-        // find max mulitple of width and height that fits in window
+        // find max multiple of width and height that fits in window
         const xScale = Math.floor(windowWidth / canvas.width);
         const yScale = Math.floor(windowHeight / canvas.height);
         gameScale = Math.min(xScale, yScale);
@@ -186,7 +252,7 @@ async function main() {
         paintPosY = (windowHeight - scaledGameHeight) / 2;
         backCtx.strokeStyle = 'white';
         backCtx.lineWidth = 1;
-        backCtx.imageSmoothingEnabled = true;
+        backCtx.imageSmoothingEnabled = false;
         backCtx.strokeRect(paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
       }
     }
@@ -201,7 +267,7 @@ async function main() {
     const buffer = Buffer.from(backCanvas.data().buffer);
     
     const startWindowRenderTime = performance.now();
-    appWindow.render(backCanvas.width, backCanvas.height, stride, 'rgba32', buffer);
+    await appWindow.render(backCanvas.width, backCanvas.height, stride, 'rgba32', buffer);
     windowRenderTime+= (performance.now() - startWindowRenderTime);
   }
 
@@ -210,23 +276,10 @@ async function main() {
     process.exit(0);
   });
 
-
-  const resize = () => {
-    const { pixelWidth, pixelHeight } = appWindow;
-    stride = pixelWidth * 4;
-    backCanvas = createCanvas(pixelWidth, pixelHeight);
-    // backCanvas = new Canvas(pixelWidth, pixelHeight);
-    console.log('resize', pixelWidth, pixelHeight);
-    backCanvas.name = 'backCanvas';
-    scaledGameWidth = 0;
-    scaledGameHeight = 0;
-  }
-  
   appWindow
     .on('resize', resize)
     .on('expose', resize)
   
-  let lastTime = performance.now();
   function launcherLoop() {
     callCount++;
     const gamepads = globalThis.navigator.getGamepads();
@@ -238,14 +291,11 @@ async function main() {
       }
     }
 
-    // console.log('currentRafCallback', currentRafCallback);
     const callbackStartTime = performance.now();
     if (currentRafCallback) {
-      const currentTime = performance.now();
       let thisCallback = currentRafCallback;
       currentRafCallback = null;
-      thisCallback.callback(currentTime - lastTime);
-      lastTime = currentTime;
+      thisCallback.callback(performance.now());
     }
     callbackTime+= (performance.now() - callbackStartTime);
 
@@ -260,9 +310,10 @@ async function main() {
   setInterval(() => {
     // somtimes console.log throws an error ¯\_(ツ)_/¯
     try {
-      console.log(callCount, 'FPS',
+      console.log(callCount / 5, 'FPS',
         'window.WxH', backCanvas.width, backCanvas.height,
         'drawImage', Number(imageDrawTime / callCount).toFixed(5),
+        'game stretched', scaledGameWidth, scaledGameHeight,
         'game.callback', Number(callbackTime / callCount).toFixed(5),
         'game.scale', gameScale,
         'window.render', Number(windowRenderTime / callCount).toFixed(5),
@@ -275,7 +326,7 @@ async function main() {
     imageDrawTime = 0;
     callbackTime = 0;
     windowRenderTime = 0;
-  }, 1000);
+  }, 5000);
 }
 
 main();
