@@ -2,13 +2,19 @@
 
 A compatibily layer for Javscript games to run WITHOUT a browser or electron using standard web APIs.
 
+The goal is to run games on cheap retro devices that will also run in browsers without any changes.
+
+![retro handlheld](rg40xxv_demo.jpg)
+
 ## Browser APIs available
 
 - canvas
 - gamepads
 - keyboard
+- mouse
 - localStorage
-- web audio
+
+[sample games / demos](https://github.com/monteslu/jsgames)
 
 ## Running on a desktop OS
 
