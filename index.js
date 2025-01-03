@@ -280,8 +280,7 @@ async function main() {
     .on('resize', resize)
     .on('expose', resize)
   
-  function launcherLoop(loopTime = 16) {
-    const startLoopTime = performance.now();
+  function launcherLoop() {
     callCount++;
     const gamepads = globalThis.navigator.getGamepads();
     if (gamepads[0]) {
@@ -296,13 +295,12 @@ async function main() {
     if (currentRafCallback) {
       let thisCallback = currentRafCallback;
       currentRafCallback = null;
-      thisCallback.callback(loopTime);
+      thisCallback.callback(performance.now());
     }
     callbackTime+= (performance.now() - callbackStartTime);
 
     launcherDraw();
-    const endLoopTime = performance.now();
-    setImmediate(() => launcherLoop(endLoopTime - startLoopTime));
+    setImmediate(launcherLoop);
   }
   
   initGamepads();
