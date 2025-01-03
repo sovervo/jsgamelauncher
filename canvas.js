@@ -23,6 +23,21 @@ export function createCanvas(width, height) {
     
     return ctx;
   }
+  canvas.getBoundingClientRect = () => {
+    return {
+      x: 0,
+      y: 0,
+      top: 0,
+      left: 0,
+      right: canvas.width,
+      bottom: canvas.height,
+      width: canvas.width,
+      height: canvas.height,
+    };
+  }
+  canvas.parent = globalThis.document.body;
+  globalThis.document.body._canvas = canvas;
+  
   return canvas;
 }
 

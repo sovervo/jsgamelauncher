@@ -1,6 +1,16 @@
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import { loadImage as canvasLoadImage, Image } from '@napi-rs/canvas';
+import { randomUUID } from 'node:crypto';
+
+async function blobToDataURL(blob) {
+  const arrayBuffer = await blob.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const base64 = buffer.toString('base64');
+  const type = blob.type || 'image/png';
+  return `data:${type};base64,${base64}`;
+}
 
 function getFinalUrl(gamePath, url) {
   let finalUrl;
@@ -14,14 +24,14 @@ function getFinalUrl(gamePath, url) {
   } else {
     finalUrl = path.join(gamePath, url);
   }
-  console.log('getFinalUrl:', url, 'finalUrl:', finalUrl);
+  // console.log('getFinalUrl:', url, 'finalUrl:', finalUrl);
   return finalUrl;
 }
 
 export function createLoadImage(gamePath) {
-  console.log('createLoadImage', gamePath);
+  // console.log('createLoadImage', gamePath);
   return (url, force) => {
-    console.log('loadImage...', gamePath, url, force);
+    // console.log('loadImage...', gamePath, url, force);
     let finalUrl = url;
     if (!force) {
       finalUrl = getFinalUrl(gamePath, url);
@@ -43,20 +53,45 @@ export function createImageClass(gamePath) {
       this._src = '';
     }
     set src(url) {
-      const finalUrl = getFinalUrl(gamePath, url);
+      let finalUrl = getFinalUrl(gamePath, url);
       this._src = finalUrl;
-      canvasLoadImage(finalUrl).then((image) => {
-        this._width = image.width;
-        this._height = image.height;
-        this._imgImpl = image;
-        if (this.onload) {
-          this.onload(this);
+      let tempBlobFile;
+      const load = async () => {
+        if (finalUrl.startsWith('blob:')) {
+          // phaser likes blobs.
+          const blob = URL.fetchBlobFromUrl(finalUrl);
+          if (blob.arrayBuffer) {
+            finalUrl = await blobToDataURL(blob);
+          } else {
+            const blobDir = path.join(os.homedir(), '.jsgamelauncher', 'temp');
+            if (!fs.existsSync(blobDir)) {
+              fs.mkdirSync(blobDir, { recursive: true });
+            }
+            tempBlobFile = path.join(blobDir, randomUUID() + '.png');
+            fs.writeFileSync(tempBlobFile, blob);
+            finalUrl = tempBlobFile;
+          }
         }
-      }).catch((error) => {
-        if (this.onerror) {
-          this.onerror(error);
+        try {
+          const image = await canvasLoadImage(finalUrl);
+          if (tempBlobFile) {
+            fs.rmSync(tempBlobFile);
+          }
+          this._width = image.width;
+          this._height = image.height;
+          this._imgImpl = image;
+          if (this.onload) {
+            // console.log('image onload', finalUrl);
+            this.onload(this);
+          }
+        } catch (error) {
+          console.error('Error loading image:', error);
+          if (this.onerror) {
+            this.onerror(error);
+          }
         }
-      });
+      }
+      load();
     }
     get src() {
       return this._src;

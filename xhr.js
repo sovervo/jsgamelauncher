@@ -9,28 +9,33 @@ export default function createXMLHttpRequest(gameDir) {
     : gameDir;
 
   return class LocalXMLHttpRequest extends XHRShim {
-    constructor() {
-      super();
-      this.isLocalFile = false;
+    constructor(...args) {
+      super(...args);
+      this.isFSFilePath = false;
       this.localFilePath = '';
+      // console.log('LocalXMLHttpRequest constructor', args);
     }
 
     open(method, url, async = true, user = null, password = null) {
       const lcUrl = String(url).toLowerCase();
-
       // Determine if it's a local file
       if (!lcUrl.startsWith('http') && !lcUrl.startsWith('//')) {
-        this.isLocalFile = true;
+        this.isFSFilePath = true;
         this.localFilePath = path.join(resourcePath, url);
       } else {
-        this.isLocalFile = false;
+        this.isFSFilePath = false;
       }
+      // console.log('XHR open', method, url, async, this.isFSFilePath);
 
       super.open(method, url, async, user, password); // Call the parent class's open method
     }
+    get responseText() {
+      return this._responseText;
+    }
 
     send(data = null) {
-      if (this.isLocalFile) {
+      // console.log('XHR send', data, this.isFSFilePath);
+      if (this.isFSFilePath) {
         // Handle local file requests
         fs.readFile(this.localFilePath, (err, fileContent) => {
           if (err) {
@@ -44,15 +49,16 @@ export default function createXMLHttpRequest(gameDir) {
           // Set up response headers and content
           this.status = 200;
           this.statusText = 'OK';
-          this.responseText = fileContent.toString('utf-8');
+          this._responseText = fileContent;
           this.responseType = 'text';
           this.response = this.responseText;
           this.readyState = 4;
           this.getAllResponseHeaders = () =>
             `Content-Type: ${mime.lookup(this.localFilePath) || 'application/octet-stream'}`;
 
-          // Trigger the onreadystatechange callback
-          this.onreadystatechange && this.onreadystatechange();
+          this.onreadystatechange && this.onreadystatechange(this, {});
+          this.onload && this.onload(this, {});
+          this.onLoad && this.onLoad(this, {});
         });
       } else {
         // Fall back to the parent class's send method for web requests
