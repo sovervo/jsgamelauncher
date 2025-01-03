@@ -12,7 +12,9 @@ import initializeEvents from './events.js';
 import { AudioContext, AudioDestinationNode, OscillatorNode, GainNode, AudioBuffer } from 'webaudio-node';
 import createFetch from './fetch.js';
 import createXMLHttpRequest from './xhr.js';
-
+import { createObjectURL, revokeObjectURL, fetchBlobFromUrl } from './blob.js';
+import { Audio } from './audio.js';
+import { Video } from './video.js';
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
@@ -43,6 +45,7 @@ console.error = (...args) => {
 }
 
 globalThis.global = globalThis;
+globalThis.self = globalThis;
 console.log('LAUNCHING....');
 // console.log('@napi-rs/canvas capabilities', Object.keys(nrsc));
 // console.log('@kmamal/sdl capabilities', Object.keys(sdl));
@@ -52,22 +55,44 @@ globalThis.window = globalThis;
 globalThis.HTMLCanvasElement = nrsc.Canvas;
 globalThis.ImageData = ImageData;
 globalThis.OffscreenCanvas = OffscreenCanvas;
+globalThis.Audio = Audio;
+globalThis.Video = Video;
+URL.createObjectURL = createObjectURL;
+URL.revokeObjectURL = revokeObjectURL;
+URL.fetchBlobFromUrl = fetchBlobFromUrl;
 const document = {
   getElementById: (id) => {
     // console.log('document.getElementById', id, canvas);
     return canvas;
   },
   createElement: (name) => {
+    console.log('DCOUMENT.createElement', name);
     if (name === 'canvas') {
       return createCanvas(300, 150);
     }
     if (name === 'image' && globalThis.Image) {
       return new globalThis.Image();
     }
+    if (name === 'video' && globalThis.Video) {
+      return new globalThis.Video();
+    }
+    if (name === 'audio' && globalThis.Audio) {
+      return new globalThis.Audio();
+    }
     return {};
   },
   body: {
     appendChild: () => {},
+    getBoundingClientRect: () => {
+      return {
+        left: 0,
+        top: 0,
+        width: canvas?.width,
+        height: canvas?.height,
+        right: canvas?.width,
+        bottom: canvas?.height,
+      };
+    },
   },
   documentElement: {},
   readyState: 'complete',
@@ -193,13 +218,13 @@ async function main() {
 
   canvas = createCanvas(gameWidth, gameHeight);
   if (!canvas.addEventListener) {
-    canvas.addEventListener = (a, b, c) => {
-      console.log('canvas.addEventListener', a, b, c);
+    canvas.addEventListener = (a) => {
+      console.log('canvas.addEventListener', a);
     };
   }
   if (!canvas.removeEventListener) {
-    canvas.removeEventListener = (a, b, c) => {
-      console.log('canvas.removeEventListener', a, b, c);
+    canvas.removeEventListener = (a) => {
+      console.log('canvas.removeEventListener', a);
     };
   }
   if (!canvas.getBoundingClientRect) {
