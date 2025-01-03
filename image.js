@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import { loadImage as canvasLoadImage, Image } from '@napi-rs/canvas';
 
 function getFinalUrl(gamePath, url) {
@@ -30,6 +31,11 @@ export function createLoadImage(gamePath) {
 }
 
 export function createImageClass(gamePath) {
+  // check if gamePath has a public/ folder in it
+  const publicDir = path.join(gamePath, 'public');
+  if (fs.existsSync(publicDir)) {
+    gamePath = publicDir;
+  }
   class Image {
     constructor(width, height) {
       this._width = width || 0;
