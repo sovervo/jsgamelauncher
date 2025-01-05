@@ -27,7 +27,6 @@ my_reset() {
   unset -f my_has my_echo 
 }
 
-
 # this breaks the script with curl -o- . . . will figure out another way to do this later
 # # Ask about installing sample games
 # read -r -p "Do you want to copy/update the sample games (in addition to enabling the launcher)? (yes/no): " answer
@@ -87,18 +86,25 @@ my_echo "=> Installing Node.js version 22"
 source ~/.bash_profile
 nvm install 22
 
+cd ~
+my_echo "=> Cleaning up old files"
+if [ -d "$HOME/newjsgamelaunchermain.zip" ]; then
+  my_echo "=> File ~/jsgamelaunchermain.zip exists. Deleting..."
+  rm -rf ~/newjsgamelaunchermain.zip
+fi
+
+if [ -d "$HOME/jsgamelauncher-main" ]; then
+  my_echo "=> File ~/jsgamelauncher-main exists. Deleting..."
+  rm -rf ~/jsgamelauncher-main
+fi
+
 my_echo "=> Downloading jsgamelauncher"
-rm mydownload.zip
-rm -r jsgamelauncher-0.1.0
-
-
-curl -o mydownload.zip -L https://github.com/monteslu/jsgamelauncher/archive/refs/tags/v0.1.0.zip
-unzip mydownload.zip
+curl -o newjsgamelaunchermain.zip -L https://github.com/monteslu/jsgamelauncher/archive/refs/heads/main.zip
+unzip newjsgamelaunchermain.zip
 
 
 if my_distro_check; then
   my_echo "=> This is a knulli device, so I'm moving files around! And running npm install in the jsgamelauncher directory"
-  
   if [ -d "$HOME/jsgamelauncher" ]; then
     my_echo "=> Folder ~/jsgamelauncher exists. Deleting..."
     rm -rf ~/jsgamelauncher
@@ -106,11 +112,14 @@ if my_distro_check; then
     my_echo "=> Folder ~/jsgamelauncher does not exist. Copying ..."
   fi
   mkdir ~/jsgamelauncher
-  mv jsgamelauncher-0.1.0/* ~/jsgamelauncher/
-  rm mydownload.zip
+  mv jsgamelauncher-main/* ~/jsgamelauncher/
+
+  # Clean up after move
+  rm newjsgamelaunchermain.zip
+  rm -rf jsgamelauncher-main
+
   chmod +x ~/jsgamelauncher/knulli/run.sh
   cp ~/jsgamelauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/
-
 
 
   if [ -d "/userdata/roms/jsgames" ]; then
@@ -130,6 +139,4 @@ fi
 
 my_reset
 
-} # this ensures the entire script is downloaded #
-
-
+} # this ensures the entire script is downloaded

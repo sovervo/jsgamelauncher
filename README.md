@@ -44,9 +44,7 @@ Others might work we just haven't tried them! Let us know if you try them!
 - `curl -o- https://raw.githubusercontent.com/monteslu/jsgamelauncher/main/install-knulli.sh | bash`
 - That's it! Now you need a game!
 
-You can also get a specific version of jsgamelauncher by changing the version number in the install-knulli.sh script.
-
-- `curl -o- https://raw.githubusercontent.com/monteslu/jsgamelauncher/v0.1.0/install-knulli.sh | bash`
+For now we only support downloading the latest. At some point we'll modify the download script to accommodate downloading specific published versions.
 
 ### Option B) The long way (leaving this here for reference for other systems)
 
