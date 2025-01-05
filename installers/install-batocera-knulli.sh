@@ -106,7 +106,7 @@ unzip newjsgamelaunchermain.zip
 
 
 if my_distro_check; then
-  my_echo "=> This is a knulli device, so I'm moving files around! And running npm install in the jsgamelauncher directory"
+  my_echo "=> This is a compatible device, so I'm moving files around! And running npm install in the jsgamelauncher directory"
   if [ -d "$HOME/jsgamelauncher" ]; then
     my_echo "=> Folder ~/jsgamelauncher exists. Deleting..."
     rm -rf ~/jsgamelauncher
@@ -135,7 +135,7 @@ if my_distro_check; then
   my_echo "=> INSTALL SUCCESSFUL!"
   cd ~
 else
-  my_echo "=> my_distro_check says this is NOT is a knulli device, so I'm not moving files around!"
+  my_echo "=> my_distro_check says this is NOT is a compatible device for this installer, so I'm not moving files around!"
   my_echo "=> INSTALL (sorta)SUCCESSFUL!"
 fi
 
