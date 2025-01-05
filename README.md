@@ -1,4 +1,4 @@
-# @monteslu/jsgamelauncher
+# JavaScript Game Launcher
 
 <img src="rg40xxv_demo.jpg" height="300" align="right">
 
@@ -6,7 +6,7 @@ A compatibly layer for JavaScript games to run WITHOUT a browser or electron usi
 
 The goal is to run games on cheap ($50) retro devices that will also run in browsers without any changes. Anything that runs Knulli and has wifi (so Ambernic XX devices as well as TrimUI Smart Pro) should work but that's just the beginning!
 
-## Browser APIs progress
+### Browser APIs progress
 
 - [x] Canvas (2d)
 - [x] WebAudio
