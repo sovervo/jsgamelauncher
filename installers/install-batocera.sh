@@ -10,7 +10,7 @@ my_has() {
 my_distro_check() {
   if grep -q "knulli" /etc/issue; then
     return 0  # True
-  else if grep -q "READY" /etc/issue; then
+  elif grep -q "READY" /etc/issue; then
     return 0  # True
   else 
     return 1  # False
