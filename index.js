@@ -52,6 +52,7 @@ console.log('LAUNCHING....');
 let canvas;
 
 globalThis.window = globalThis;
+globalThis._jsg = { controllers: [], joysticks: [], sdl, nrsc };
 globalThis.HTMLCanvasElement = nrsc.Canvas;
 globalThis.ImageData = ImageData;
 globalThis.OffscreenCanvas = OffscreenCanvas;
