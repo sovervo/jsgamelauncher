@@ -333,6 +333,6 @@ export function initGamepads() {
   sdl.joystick.on('deviceRemove', removeJoystick);
   sdl.controller.on('deviceRemove', removeController);
   
-  // controller.devices.forEach(addController);
+  controller.devices.forEach(addController);
   joystick.devices.forEach(addJoystick);
 }
