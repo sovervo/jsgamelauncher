@@ -43,73 +43,156 @@ const stdGamepadMapping = {
 };
 
 // deeplay (RG35XXSP) joystick to browser standard gamepad button indices
-const deeplayJSMap = [
-  100, // sdl_idx 0 , ?
-  100, // sdl_idx 1 , ?
-  100, // sdl_idx 2 , ?
-  1, // sdl_idx 3 , b
-  0, // sdl_idx 4 , a
-  2, // sdl_idx 5 , x
-  3, // sdl_idx 6 , y
-  4, // sdl_idx 7 , left shoulder
-  5, // sdl_idx 8 , right shoulder
-  8, // sdl_idx 9 , select
-  9, // sdl_idx 10 , start
-  16, // sdl_idx 11 , guide
-  6, // sdl_idx 12 , left trigger
-  7, // sdl_idx 13 , right trigger
-  16, // sdl_idx 14 , guide again?
-];
+const deeplayJSMap = {
+  buttons: [
+    100, // sdl_idx 0 , ?
+    100, // sdl_idx 1 , ?
+    100, // sdl_idx 2 , ?
+    1, // sdl_idx 3 , b
+    0, // sdl_idx 4 , a
+    2, // sdl_idx 5 , x
+    3, // sdl_idx 6 , y
+    4, // sdl_idx 7 , left shoulder
+    5, // sdl_idx 8 , right shoulder
+    8, // sdl_idx 9 , select
+    9, // sdl_idx 10 , start
+    16, // sdl_idx 11 , guide
+    6, // sdl_idx 12 , left trigger
+    7, // sdl_idx 13 , right trigger
+    16, // sdl_idx 14 , guide again?
+  ],
+}
 
 // anbernic (RG40XXH) joystick to browser standard gamepad button indices
-const anbernicJSMap = [
-  100, // sdl_idx 0 , ?
-  100, // sdl_idx 1 , ?
-  100, // sdl_idx 2 , ?
-  1, // sdl_idx 3 , b
-  0, // sdl_idx 4 , a
-  2, // sdl_idx 5 , x
-  3, // sdl_idx 6 , y
-  4, // sdl_idx 7 , left shoulder
-  5, // sdl_idx 8 , right shoulder
-  8, // sdl_idx 9 , select
-  9, // sdl_idx 10 , start
-  16, // sdl_idx 11 , guide
-  10, // sdl_idx 12 , left joystick (L3)
-  6, // sdl_idx 13 , left trigger
-  7, // sdl_idx 14 , right trigger
-  11, // sdl_idx 15 , right joystick (R3)
-];
+const anbernicJSMap = {
+  buttons: [
+    100, // sdl_idx 0 , ?
+    100, // sdl_idx 1 , ?
+    100, // sdl_idx 2 , ?
+    1, // sdl_idx 3 , b
+    0, // sdl_idx 4 , a
+    2, // sdl_idx 5 , x
+    3, // sdl_idx 6 , y
+    4, // sdl_idx 7 , left shoulder
+    5, // sdl_idx 8 , right shoulder
+    8, // sdl_idx 9 , select
+    9, // sdl_idx 10 , start
+    16, // sdl_idx 11 , guide
+    10, // sdl_idx 12 , left joystick (L3)
+    6, // sdl_idx 13 , left trigger
+    7, // sdl_idx 14 , right trigger
+    11, // sdl_idx 15 , right joystick (R3)
+  ],
+}
 
 
 // translate SDL2 std joystick button ids to browser standard gamepad button indices
-const stdJoystickMapping = [
-  0, // sdl_idx 0 , a
-  1, // sdl_idx 1 , b
-  2, // sdl_idx 2 , x
-  3, // sdl_idx 3 , y
-  8, // sdl_idx 4 , back
-  16, // sdl_idx 5 , guide
-  9, // sdl_idx 6 , start
-  10, // sdl_idx 7 , left stick
-  11, // sdl_idx 8 , right stick
-  4, // sdl_idx 9 , left shoulder
-  5, // sdl_idx 10 , right shoulder
-  12, // sdl_idx 11 , dpad up
-  13, // sdl_idx 12 , dpad down
-  14, // sdl_idx 13 , dpad left
-  15, // sdl_idx 14 , dpad right
-];
+const stdJoystickMapping = {
+  buttons: [
+    0, // sdl_idx 0 , a
+    1, // sdl_idx 1 , b
+    2, // sdl_idx 2 , x
+    3, // sdl_idx 3 , y
+    8, // sdl_idx 4 , back
+    16, // sdl_idx 5 , guide
+    9, // sdl_idx 6 , start
+    10, // sdl_idx 7 , left stick
+    11, // sdl_idx 8 , right stick
+    4, // sdl_idx 9 , left shoulder
+    5, // sdl_idx 10 , right shoulder
+    12, // sdl_idx 11 , dpad up
+    13, // sdl_idx 12 , dpad down
+    14, // sdl_idx 13 , dpad left
+    15, // sdl_idx 14 , dpad right
+  ],
+}
 
+// xbox 360 "pad" knockoffs that SDL doesn't recognize as a controller
+const xbox360JSMap = {
+  buttons: [
+    0, // sdl_idx 0 , a
+    1, // sdl_idx 1 , b
+    2, // sdl_idx 2 , x
+    3, // sdl_idx 3 , y
+    4, // sdl_idx 4 , left shoulder
+    5, // sdl_idx 5 , right shoulder
+    8, // sdl_idx 6 , select
+    9, // sdl_idx 7 , start
+    16, // sdl_idx 8 , guide
+    10, // sdl_idx 9 , left joystick (L3)
+    11, // sdl_idx 10 , right joystick (R3)
+  ],
+  axesHandler: (gp, e) => {
+    let val;
+    if (e.axis === 0 || e.axis === 1) {
+      gp.axes[e.axis] = e.value;
+    } else if (e.axis === 2) {
+      gp.axes[4] = e.value;
+      val = (e.value + 1) / 2;
+      gp.buttons[6].value = val;
+      gp.buttons[6].pressed = val > 0.11;
+    } else if (e.axis === 3) {
+      gp.axes[2] = e.value;
+    } else if (e.axis === 4) {
+      gp.axes[3] = e.value;
+    } else if (e.axis === 5) {
+      gp.axes[5] = e.value;
+      val = (e.value + 1) / 2;
+      gp.buttons[7].value = val;
+      gp.buttons[7].pressed = val > 0.11;
+    }
+  },
+};
+
+// sony ps4 controller, not sure why SDL isn't mapping it as a controller
+const sonyPS4JSMap = {
+  buttons: [
+    0, // sdl_idx 0 , a
+    1, // sdl_idx 1 , b
+    3, // sdl_idx 2 , x
+    2, // sdl_idx 3 , y
+    4, // sdl_idx 4 , left shoulder
+    5, // sdl_idx 5 , right shoulder
+    100, // sdl_idx 6 , mapped as digital l trigger?
+    100, // sdl_idx 7 , mapped as digital r trigger?
+    8, // sdl_idx 8 , select
+    9, // sdl_idx 9 , start
+    16, // sdl_idx 10 , guide
+    10, // sdl_idx 11 , left trigger
+    11, // sdl_idx 12 , right trigger
+  ],
+  axesHandler: (gp, e) => {
+    let val;
+    if (e.axis === 0 || e.axis === 1) {
+      gp.axes[e.axis] = e.value;
+    } else if (e.axis === 2) {
+      gp.axes[4] = e.value;
+      val = (e.value + 1) / 2;
+      gp.buttons[6].value = val;
+      gp.buttons[6].pressed = val > 0.11;
+    } else if (e.axis === 3) {
+      gp.axes[2] = e.value;
+    } else if (e.axis === 4) {
+      gp.axes[3] = e.value;
+    } else if (e.axis === 5) {
+      gp.axes[5] = e.value;
+      val = (e.value + 1) / 2;
+      gp.buttons[7].value = val;
+      gp.buttons[7].pressed = val > 0.11;
+    }
+  },
+};
 
 
 function createGamepad(device, _sdltype) {
-  let _jsMap = stdJoystickMapping;
+  let _jsMap = xbox360JSMap;
   const lcDev = String(device.name).toLowerCase();
   if (lcDev.startsWith('anbernic ') || ['deeplay-keys'].includes(lcDev)) {
     _jsMap = deeplayJSMap;
   } else if (lcDev.startsWith('anbernic-keys')) {
     _jsMap = anbernicJSMap;
+  } else if (lcDev.startsWith('sony')) {
+    _jsMap = sonyPS4JSMap;
   }
   return {
     id: device.name,
@@ -240,24 +323,28 @@ function addJoystick(device) {
     instance.on('*', (type, e) => {
       // console.log('JOYSTICK event', type, e);
       if (type === 'buttonDown') {
-        if (gp._jsMap[e.button] !== undefined) {
+        if (gp._jsMap.buttons[e.button] !== undefined) {
           // console.log('button down', e.button, gp._jsMap[e.button]);
-          const btn = gp.buttons[gp._jsMap[e.button]];
+          const btn = gp.buttons[gp._jsMap.buttons[e.button]];
           if (btn) {
             btn.pressed = true;
             btn.value = 1;
           }
         }
       } else if (type === 'buttonUp') {
-        if (gp._jsMap[e.button] !== undefined) {
+        if (gp._jsMap.buttons[e.button] !== undefined) {
           // console.log('button up', e.button, gp._jsMap[e.button]);
-          const btn = gp.buttons[gp._jsMap[e.button]];
+          const btn = gp.buttons[gp._jsMap.buttons[e.button]];
           if (btn) {
             btn.pressed = false;
             btn.value = 0;
           }
         }
       } else if (type === 'axisMotion') {
+        if (gp._jsMap.axesHandler) {
+          gp._jsMap.axesHandler(gp, e);
+          return;
+        }
         gp.axes[e.axis] = e.value;
         if (e.axis === 4) {
           let val = (e.value + 1) / 2;
@@ -269,6 +356,7 @@ function addJoystick(device) {
           gp.buttons[7].pressed = val > 0.11;
         }
       } else if (type === 'hatMotion' && e.hat === 0) {
+        
         if (e.value === 'up') {
           gp.buttons[12].pressed = true;
           gp.buttons[12].value = 1;
