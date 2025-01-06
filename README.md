@@ -1,6 +1,6 @@
 # JavaScript Game Launcher
 
-<img src="rg40xxv_demo.jpg" height="300" align="right">
+<img src="rg40xxv_demo.jpg" height="300" align="right" alt="RG40XXV with Phaser demo">
 
 A compatibly layer for JavaScript games to run WITHOUT a browser or electron using standard web APIs.
 
@@ -39,7 +39,7 @@ You can also just run the game directly without using jsgamelauncher. The goal i
 
 ## Installing on [Knulli](https://knulli.org/) or [Batocera](https://batocera.org/)
 
-### Option A) Use the install script!
+### Option A) Use the install script [(src)](https://github.com/monteslu/jsgamelauncher/blob/main/installers/install-batocera-knulli.sh)!
 
 - Make sure wifi is turned on for your knulli device
 - `ssh root@<myKnullidevice>` (default password: linux, default device name : KNULLI, use IP from device or <myKnullidevice>.local if name fails)
@@ -70,3 +70,7 @@ For now we only support downloading the latest. At some point we'll modify the d
 ## Installing on [muOS](https://muos.dev/)
 
 Coming soon! According to [joyrider3774](https://www.reddit.com/user/joyrider3774/) on this [thread](https://www.reddit.com/r/ANBERNIC/comments/1hsyv9n/comment/m5e2zsy/?context=3) all we need to do is install the GNU versions of ls and tar so that the curl command for installing nvm works.
+
+## Media
+
+Check the [MEDIA.md](MEDIA.md) for a running list of places this project has been posted. Not a comprehensive list of course but it helps us keep track for sharing in the future. If you see anything you liked that missing let us know . . . we might have missed it.
