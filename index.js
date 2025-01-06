@@ -132,6 +132,7 @@ globalThis.cancelAnimationFrame = cancelAnimationFrame;
 // console.log('getting options...');
 
 const options = getOptions();
+let fullscreen = false;
 
 // console.log('options', options);
 
@@ -206,7 +207,7 @@ const resize = () => {
 
 
 async function main() {
-  const fullscreen = !!options.Fullscreen;
+  fullscreen = !!options.Fullscreen;
   console.log('fullscreen', fullscreen);
   appWindow = sdl.video.createWindow({ resizable: true, fullscreen });
 
@@ -308,12 +309,18 @@ async function main() {
   
   function launcherLoop() {
     callCount++;
-    const gamepads = globalThis.navigator.getGamepads();
-    if (gamepads[0]) {
-      if (gamepads[0].buttons[16].pressed && gamepads[0].buttons[9].pressed) {
-        console.log('exit button pressed', gamepads[0].buttons[16], gamepads[0].buttons[9]);
-        console.log('EXITING');
-        process.exit(0);
+    const [gp] = globalThis.navigator.getGamepads();
+    if (gp) {
+      if (gp.buttons[16].pressed) {
+        if (gp.buttons[9].pressed) {
+          console.log('exit button pressed', gamepads[0].buttons[16], gamepads[0].buttons[9]);
+          console.log('EXITING');
+          process.exit(0);
+        } else if (gp.buttons[12].pressed) {
+          fullscreen = !fullscreen;
+          appWindow.setFullscreen(fullscreen);
+          resize();
+        }
       }
     }
 
