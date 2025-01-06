@@ -139,6 +139,31 @@ function addController(device) {
     console.log('opening controller', device);
     const instance = controller.openDevice(device);
     console.log('controller instance open', instance);
+    if (globalThis._jsg.debug) {
+      const sdlController = {
+        instance,
+        state: {
+          buttons: {...instance.buttons},
+          axes: {...instance.axes},
+        },
+        device,
+      };
+      Object.keys(sdlController.instance).forEach((key) => {
+        sdlController.state[key] = 0;
+      });
+      globalThis._jsg.controllers.push(sdlController);
+      instance.on('*', (type, e) => {
+        // console.log('controller event', type, e);
+        if (type === 'buttonDown') {
+          sdlController.state.buttons[e.button] = 1;
+        } else if (type === 'buttonUp') {
+          sdlController.state.buttons[e.button] = 0;
+        } else if (type === 'axisMotion') {
+          // console.log('AXIS MOTION', sdlController.state.axes);
+          sdlController.state.axes[e.axis] = e.value;
+        }
+      });
+    }
     instance.on('*', (type, e) => {
       // console.log('controller event', type, e);
       if (type === 'buttonDown') {
@@ -185,7 +210,33 @@ function addJoystick(device) {
     const gp = createGamepad(device, 'joystick');
     console.log('opening joystick', device);
     const instance = joystick.openDevice(device);
-    console.log('joystick instance open', instance);
+    console.log('joystick instance open', instance, instance.buttons, instance.axes, instance.hats);
+    if (globalThis._jsg.debug) {
+      const sdlJoystick = {
+        instance,
+        device,
+        state: {
+          buttons: [...instance.buttons].map((b) => b ? 1 : 0),
+          axes: [...instance.axes],
+          hats: [...instance.hats],
+        },
+      };
+      instance.on('*', (type, e) => {
+        // console.log('joystick event', type, e);
+        if (type === 'buttonDown') {
+          sdlJoystick.state.buttons[e.button] = 1;
+        } else if (type === 'buttonUp') {
+          sdlJoystick.state.buttons[e.button] = 0;
+        }
+        if (type === 'axisMotion') {
+          sdlJoystick.state.axes[e.axis] = e.value;
+        }
+        if (type === 'hatMotion') {
+          sdlJoystick.state.hats[e.hat] = e.value;
+        }
+      });
+      globalThis._jsg.joysticks.push(sdlJoystick);
+    }
     instance.on('*', (type, e) => {
       // console.log('JOYSTICK event', type, e);
       if (type === 'buttonDown') {
@@ -252,8 +303,11 @@ export function initGamepads() {
     addController(e.device);
   });
   sdl.joystick.on('deviceAdd', (e) => {
-    console.log('deviceAdd joystick', e);
-    addJoystick(e.device);
+    // just in case controller event is going to fire for same device, we want that instead.
+    setTimeout(() => {
+      console.log('deviceAdd joystick', e);
+      addJoystick(e.device);
+    }, 300);
   });
   
   function removeController(device) {
@@ -281,6 +335,4 @@ export function initGamepads() {
   
   controller.devices.forEach(addController);
   joystick.devices.forEach(addJoystick);
-  
 }
-
