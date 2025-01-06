@@ -319,6 +319,7 @@ async function main() {
         } else if (gp.buttons[12].pressed) {
           fullscreen = !fullscreen;
           appWindow.setFullscreen(fullscreen);
+          resize();
         }
       }
     }
