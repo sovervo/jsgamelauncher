@@ -41,8 +41,8 @@ You can also just run the game directly without using jsgamelauncher. The goal i
 
 ### Option A) Use the install script [(src)](https://github.com/monteslu/jsgamelauncher/blob/main/installers/install-batocera-knulli.sh)!
 
-- Make sure wifi is turned on for your knulli device
-- `ssh root@<myKnullidevice>` (default password: linux, default device name : KNULLI, use IP from device or <myKnullidevice>.local if name fails)
+- Make sure wifi is turned on for your Knulli device or you are otherwise connected to the internet on a Batocera device
+- `ssh root@<myDevice>` (default password: linux, default device name : KNULLI or BATOCERA, use IP from device or <myDevice>.local if name fails)
 - `curl -o- https://raw.githubusercontent.com/monteslu/jsgamelauncher/main/installers/install-batocera-knulli.sh | bash`
 - That's it! Now you need a [game](https://github.com/monteslu/jsgames)! Just put that in `/userdata/roms/jsgames` if you are on Knulli. All you need is a game.js file as a starting point and a file called "&lt;game name&gt;.jsg". This could change!
 
