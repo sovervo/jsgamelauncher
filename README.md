@@ -33,16 +33,18 @@ Others might work we just haven't tried them! Let us know if you try them!
 - clone this repo
 - cd to this directory
 - npm install
-- `node index -rom /full/path/to/game.js` (clone sample game at https://github.com/monteslu/jsgames/tuxgame/game.js)
+- `node index -rom /full/path/to/game.js` (clone sample game at https://github.com/monteslu/jsgames/tree/main/tuxgame or find other games at https://github.com/monteslu/jsgames)
 
-## Installing on Knulli (custom linux for Anbernic retro handhelds)
+You can also just run the game directly without using jsgamelauncher. The goal is to make web games that also work on a low end device but the web is a first class citizen. Check out the [Simple Vite](https://github.com/monteslu/jsgames/tree/main/simple-vite) example.
+
+## Installing on [Knulli](https://knulli.org/) or [Batocera](https://batocera.org/)
 
 ### Option A) Use the install script!
 
 - Make sure wifi is turned on for your knulli device
 - `ssh root@<myKnullidevice>` (default password: linux, default device name : KNULLI, use IP from device or <myKnullidevice>.local if name fails)
-- `curl -o- https://raw.githubusercontent.com/monteslu/jsgamelauncher/main/install-knulli.sh | bash`
-- That's it! Now you need a game!
+- `curl -o- https://raw.githubusercontent.com/monteslu/jsgamelauncher/main/installers/install-batocera-knulli.sh | bash`
+- That's it! Now you need a [game](https://github.com/monteslu/jsgames)! Just put that in `/userdata/roms/jsgames` if you are on Knulli. All you need is a game.js file as a starting point and a file called "&lt;game name&gt;.jsg". This could change!
 
 For now we only support downloading the latest. At some point we'll modify the download script to accommodate downloading specific published versions.
 
