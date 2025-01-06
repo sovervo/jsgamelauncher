@@ -50,27 +50,23 @@ For now we only support downloading the latest. At some point we'll modify the d
 
 ### Option B) The long way (leaving this here for reference for other systems)
 
-- Make sure wifi is turned on for your knulli device
+- Make sure wifi is turned on for your Knulli device
 - `ssh root@<myKnullidevice>` (default password: linux, default device name : KNULLI, use IP from device if name fails)
 - `touch ~/.bash_profile`
 - `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash`
 - `source ./.bash_profile`
 - `nvm install 22`
-- If you did npm install in jsgameslauncher on your local machine, delete the node_modules directory
-- Copy this directory (jsgameslauncher) to `/userdata/system` on the knulli device (using the SMB share at \\<myKnullidevice>\share\system, or SFTP, etc)
-- `chmod +x ~/jsgameslauncher/knulli/run.sh`
-- `cp ~/jsgameslauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/`
+- If you did npm install in jsgamelauncher on your local machine, delete the node_modules directory
+- Copy this directory (jsgamelauncher) to `/userdata/system` on the knulli device (using the SMB share at \\<myKnullidevice>\share\system, or SFTP, etc)
+- `chmod +x ~/jsgamelauncher/knulli/run.sh`
+- `cp ~/jsgamelauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/`
 - `mkdir /userdata/roms/jsgames`
-- `cd ~/jsgameslauncher`
+- `cd ~/jsgamelauncher`
 - `npm install`
 - Copy any "roms" to jsgames (can do this with samba, ftp, or onto the SD card, note that if you connected via Samba, you might have to force a refresh of the Samba share)
 - Restart the system
 - ENJOY!
 
-## Running on Batocera
+## Installing on [muOS](https://muos.dev/)
 
-Install script coming soon! Should be very similar to the Knulli install script.
-
-## Running on muOS
-
-Should run here too but we just haven't tested it yet.
+Coming soon! According to [joyrider3774](https://www.reddit.com/user/joyrider3774/) on this [thread](https://www.reddit.com/r/ANBERNIC/comments/1hsyv9n/comment/m5e2zsy/?context=3) all we need to do is install the GNU versions of ls and tar so that the curl command for installing nvm works.
