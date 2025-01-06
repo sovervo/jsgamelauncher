@@ -10,7 +10,9 @@ my_has() {
 my_distro_check() {
   if grep -q "knulli" /etc/issue; then
     return 0  # True
-  else
+  elif grep -q "READY" /etc/issue; then
+    return 0  # True
+  else 
     return 1  # False
   fi
 }
@@ -56,11 +58,11 @@ my_grep() {
   GREP_OPTIONS='' command grep "$@"
 }
 
-# check to see if I'm running on a knulli device
+# check to see if I'm running on a knulli/batocera device
 if my_distro_check; then
-  my_echo "=> This is a knulli device, /etc/issue says so"
+  my_echo "=> This is a compatible device, /etc/issue says so"
 else
-  my_echo "=> This NOT is a knulli device, EXITING!!"
+  my_echo "=> This NOT is a compatible device, EXITING!!"
   exit 1
 fi
 
@@ -104,7 +106,7 @@ unzip newjsgamelaunchermain.zip
 
 
 if my_distro_check; then
-  my_echo "=> This is a knulli device, so I'm moving files around! And running npm install in the jsgamelauncher directory"
+  my_echo "=> This is a compatible device, so I'm moving files around! And running npm install in the jsgamelauncher directory"
   if [ -d "$HOME/jsgamelauncher" ]; then
     my_echo "=> Folder ~/jsgamelauncher exists. Deleting..."
     rm -rf ~/jsgamelauncher
@@ -133,7 +135,7 @@ if my_distro_check; then
   my_echo "=> INSTALL SUCCESSFUL!"
   cd ~
 else
-  my_echo "=> my_distro_check says this is NOT is a knulli device, so I'm not moving files around!"
+  my_echo "=> my_distro_check says this is NOT is a compatible device for this installer, so I'm not moving files around!"
   my_echo "=> INSTALL (sorta)SUCCESSFUL!"
 fi
 
