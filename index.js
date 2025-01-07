@@ -111,6 +111,7 @@ globalThis.sdl = sdl;
 
 let rafCallbackId = 1;
 let currentRafCallback;
+let callResizeEvents;
 
 function requestAnimationFrame(callback) {
   rafCallbackId++;
@@ -175,8 +176,8 @@ globalThis.XMLHttpRequest = createXMLHttpRequest(romDir);
 globalThis.localStorage = await createLocalStorage(romName);
 
 
-let gameWidth = 640;
-let gameHeight = 480;
+let gameWidth = 640; // default width
+let gameHeight = 480; // default height
 let prevGameWidth = gameWidth;
 let prevGameHeight = gameHeight;
 let stride = 0;
@@ -216,9 +217,13 @@ async function main() {
     appWindow.setFullscreen(fullscreen);
     resize();
   }, 10);
-  initializeEvents(appWindow);
+  const eventHandlers = initializeEvents(appWindow);
+  callResizeEvents = eventHandlers.callResizeEvents;
+  const callLoadingEvents = eventHandlers.callLoadingEvents;
 
   canvas = createCanvas(gameWidth, gameHeight);
+  globalThis.innerWidth = canvas.width;
+  globalThis.innerHeight = canvas.height;
   if (!canvas.addEventListener) {
     canvas.addEventListener = (a) => {
       console.log('canvas.addEventListener', a);
@@ -242,8 +247,10 @@ async function main() {
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   canvas.name = 'game canvas';
-
+  // console.log('Pre-import gameWidth', canvas.width , 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
   await import(gameFile);
+  // console.log('Post-import gameWidth', canvas.width, 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
+  callLoadingEvents();
 
   let paintPosX = 0;
   let paintPosY = 0;
@@ -264,6 +271,7 @@ async function main() {
     }
     const backCtx = backCanvas.getContext('2d');
     backCtx.imageSmoothingEnabled = false;
+    // console.log('gameWidth', gameWidth, 'gameHeight', gameHeight, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
     
     if (!scaledGameWidth || prevGameWidth !== gameWidth || prevGameHeight !== gameHeight) {
       prevGameWidth = gameWidth;
