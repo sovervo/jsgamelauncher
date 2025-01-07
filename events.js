@@ -31,6 +31,8 @@ export default function initialize(appWindow) {
   globalThis.document = globalThis.document || {};
   let keyDownListeners = [];
   let keyUpListeners = [];
+  let loadingEvents = [];
+  let resizeEvents = [];
 
   appWindow.on('keyDown', (e) => {
     keyDownListeners.forEach((listener) => {
@@ -50,6 +52,10 @@ export default function initialize(appWindow) {
       keyDownListeners.push(listener);
     } else if (type === 'keyup') {
       keyUpListeners.push(listener);
+    } else if (type === 'load') {
+      loadingEvents.push(listener);
+    } else if (type === 'resize') {
+      resizeEvents.push(listener);
     }
   };
 
@@ -61,9 +67,36 @@ export default function initialize(appWindow) {
       keyDownListeners = keyDownListeners.filter((l) => l !== listener);
     } else if (type === 'keyup') {
       keyUpListeners = keyUpListeners.filter((l) => l !== listener);
+    } else if (type === 'load') {
+      loadingEvents = loadingEvents.filter((l) => l !== listener);
+    } else if (type === 'resize') {
+      resizeEvents = resizeEvents.filter((l) => l !== listener);
     }
   }
 
   globalThis.document.removeEventListener = globalThis.removeEventListener;
   globalThis.document.body.removeEventListener = globalThis.removeEventListener;
+
+  function callLoadingEvents() {
+    for (const event of loadingEvents) {
+      event({});
+    }
+    if (globalThis.onload) {
+      globalThis.onload();
+    }
+  }
+
+  function callResizeEvents() {
+    for (const event of resizeEvents) {
+      event({});
+    }
+    if (globalThis.onresize) {
+      globalThis.onresize();
+    }
+  }
+
+  return {
+    callLoadingEvents,
+    callResizeEvents,
+  }
 }

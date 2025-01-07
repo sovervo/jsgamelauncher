@@ -1,4 +1,154 @@
 import sdl from '@kmamal/sdl';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+const controllerList = require('./controllers/db.json');
+
+function getControllerDef(device) {
+  let def;
+
+  const matchedGuids = controllerList.filter((c) => c.guid === device.guid);
+  if (matchedGuids.length > 0) {
+    // console.log('matchedGuids', device.name, matchedGuids);
+    const matchedGuidAndName = matchedGuids.filter((c) => c.name === device.name);
+    // console.log('matchedGuidAndName', matchedGuidAndName);
+    if (matchedGuidAndName.length === 1) {
+      return matchedGuidAndName[0];
+    }
+    if (matchedGuidAndName.length > 1) {
+      def = matchedGuidAndName[0];
+      for (const c of matchedGuidAndName) {
+        if (c.input.length > def.input.length) {
+          def = c;
+        }
+      }
+      return def;
+    }
+    def = matchedGuids[0];
+    for (const c of matchedGuids) {
+      if (c.input.length > def.input.length) {
+        def = c;
+      }
+    }
+    return def;
+  }
+  const matchedNames = controllerList.filter((c) => c.name === device.name);
+  if (matchedNames.length > 0) {
+    def = matchedNames[0];
+    for (const c of matchedNames) {
+      if (c.input.length > def.input.length) {
+        def = c;
+      }
+    }
+    return def;
+  }
+  return def;
+}
+
+const AXIS_THRESHOLD = 0.11;
+
+// for standard controller mappings, emulation station uses nintendo style button ids
+const esButtonMap = {
+  'b': 0,
+  'a': 1,
+  'y': 2,
+  'x': 3,
+  'pageup': 4,
+  'pagedown': 5,
+  'l2': 6,
+  'r2': 7,
+  'select': 8,
+  'start': 9,
+  'l3': 10,
+  'r3': 11,
+  'up': 12,
+  'down': 13,
+  'left': 14,
+  'right': 15,
+  'hotkey': 16,
+}
+
+function createJSMap(device) {
+  const def = getControllerDef(device);
+  if (!def) {
+    return;
+  }
+  const buttons = Array(17).fill(100);
+  const axes = [];
+  def.input.forEach((i) => {
+    if (i.type === 'button') {
+      const btnId = parseInt(i.id, 10);
+      const btnStdId = esButtonMap[i.name];
+      buttons[btnId] = btnStdId;
+      // console.log('button', i.name, btnStdId, btnId);
+    } else if (i.type === 'axis') {
+      const id = parseInt(i.id, 10);
+      if (!axes[id]) {
+        axes[id] = [];
+      }
+      axes[id].push({
+        id,
+        name: i.name,
+        value: parseInt(i.value, 10),
+      });
+    }
+  });
+  const JSMap = {
+    buttons,
+    axesHandler: (gp, e) => {
+      const val = e.value;
+      // gp.axes[e.axix] = e.value;
+      const axesDefs = axes[e.axis];
+      if (!axesDefs) {
+        return;
+      }
+      for (const a of axesDefs) {
+        switch (a.name) {
+          case 'joystick1left':
+            gp.axes[0] = val;
+            break;
+          case 'joystick1up':
+            gp.axes[1] = val;
+            break;
+          case 'joystick2left':
+            gp.axes[2] = val;
+            break;
+          case 'joystick2up':
+            gp.axes[3] = val;
+            break;
+          case 'l2':
+            gp.axes[5] = val;
+            gp.buttons[6].value = (val + 1) / 2;
+            gp.buttons[6].pressed = ((val + 1) / 2) > AXIS_THRESHOLD;
+            break;
+          case 'r2':
+            gp.axes[6] = val;
+            gp.buttons[7].value = (val + 1) / 2;
+            gp.buttons[7].pressed = ((val + 1) / 2) > AXIS_THRESHOLD;
+            break;
+          case 'left':
+            gp.axes[0] = val;
+            gp.buttons[14].pressed = val < -AXIS_THRESHOLD;
+            break;
+          case 'right':
+            gp.axes[0] = val;
+            gp.buttons[15].pressed = val > AXIS_THRESHOLD;
+            break;
+          case 'up':
+            gp.axes[1] = val;
+            gp.buttons[12].pressed = val < -AXIS_THRESHOLD;
+            break;
+          case 'down':
+            gp.axes[1] = val;
+            gp.buttons[13].pressed = val > AXIS_THRESHOLD;
+            break;
+        }
+      }
+    },
+    dbMatch: def,
+  };
+  return JSMap;
+}
 
 const { controller, joystick } = sdl;
 
@@ -185,17 +335,25 @@ const sonyPS4JSMap = {
 
 
 function createGamepad(device, _sdltype) {
-  let _jsMap = xbox360JSMap;
-  const lcDev = String(device.name).toLowerCase();
-  if (lcDev.startsWith('anbernic ') || ['deeplay-keys'].includes(lcDev)) {
-    _jsMap = deeplayJSMap;
-  } else if (lcDev.startsWith('anbernic-keys')) {
-    _jsMap = anbernicJSMap;
-  } else if (lcDev.startsWith('sony')) {
-    _jsMap = sonyPS4JSMap;
+  const def = getControllerDef(device);
+  // console.log('def', JSON.stringify(def, null, 2));
+  let _jsMap = createJSMap(device);
+  if (!_jsMap) {
+    const lcDev = String(device.name).toLowerCase();
+    if (lcDev.startsWith('anbernic ') || ['deeplay-keys'].includes(lcDev)) {
+      _jsMap = deeplayJSMap;
+    } else if (lcDev.startsWith('anbernic-keys')) {
+      _jsMap = anbernicJSMap;
+    } else if (lcDev.startsWith('sony')) {
+      _jsMap = sonyPS4JSMap;
+    } else {
+      _jsMap = xbox360JSMap;
+    }
   }
+  
   return {
     id: device.name,
+    name: device.name,
     index: device._index,
     guid: device.guid,
     mapping: 'standard',
@@ -205,6 +363,7 @@ function createGamepad(device, _sdltype) {
     }),
     _sdltype,
     _jsMap,
+    device,
   }
 }
 
