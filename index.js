@@ -111,6 +111,7 @@ globalThis.sdl = sdl;
 
 let rafCallbackId = 1;
 let currentRafCallback;
+let callResizeEvents;
 
 function requestAnimationFrame(callback) {
   rafCallbackId++;
@@ -216,7 +217,9 @@ async function main() {
     appWindow.setFullscreen(fullscreen);
     resize();
   }, 10);
-  initializeEvents(appWindow);
+  const eventHandlers = initializeEvents(appWindow);
+  callResizeEvents = eventHandlers.callResizeEvents;
+  const callLoadingEvents = eventHandlers.callLoadingEvents;
 
   canvas = createCanvas(gameWidth, gameHeight);
   globalThis.innerWidth = canvas.width;
@@ -244,9 +247,10 @@ async function main() {
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   canvas.name = 'game canvas';
-  console.log('Pre-import gameWidth', canvas.width , 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
+  // console.log('Pre-import gameWidth', canvas.width , 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
   await import(gameFile);
-  console.log('Post-import gameWidth', canvas.width, 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
+  // console.log('Post-import gameWidth', canvas.width, 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
+  callLoadingEvents();
 
   let paintPosX = 0;
   let paintPosY = 0;
