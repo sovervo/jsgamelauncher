@@ -1,11 +1,28 @@
 import sdl from '@kmamal/sdl';
 import { createRequire } from 'module';
+import parseCfg from './controllers/parse_cfg.js';
 const require = createRequire(import.meta.url);
 
 const controllerList = require('./controllers/db.json');
+let additionalControllerList = [];
+
 
 function getControllerDef(device) {
   let def;
+  device.name = ('' + device.name).trim();
+  console.log('getControllerDef', device.name, device.guid);
+
+  // check additional controller list first
+  const matchedAdditional = additionalControllerList.filter((c) => {
+    // console.log('checking additional controller', c.guid, c.name);
+    return (c.guid === device.guid) && (c.name === device.name);
+  });
+  console.log('matchedAdditional', matchedAdditional);
+  if (matchedAdditional?.length) {
+    console.log('matchedAdditional', matchedAdditional);
+    // last (most recent) one on the list
+    return matchedAdditional[matchedAdditional.length - 1];
+  }
 
   const matchedGuids = controllerList.filter((c) => c.guid === device.guid);
   if (matchedGuids.length > 0) {
@@ -335,7 +352,7 @@ const sonyPS4JSMap = {
 
 
 function createGamepad(device, _sdltype) {
-  const def = getControllerDef(device);
+  // const def = getControllerDef(device);
   // console.log('def', JSON.stringify(def, null, 2));
   let _jsMap = createJSMap(device);
   if (!_jsMap) {
@@ -544,7 +561,17 @@ function addJoystick(device) {
   }
 }
 
-export function initGamepads() {
+export async function initGamepads(addtionalControllerListFile) {
+
+  if (addtionalControllerListFile) {
+    try {
+      additionalControllerList = await parseCfg(addtionalControllerListFile);
+      console.log('additional controllers count', additionalControllerList.length);
+    } catch (e) {
+      console.error('error parsing additional controller list', e);
+    }
+  }
+
   sdl.controller.on('deviceAdd', (e) => {
     console.log('deviceAdd controller', e);
     addController(e.device);

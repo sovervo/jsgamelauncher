@@ -33,6 +33,11 @@ export default function initialize(appWindow) {
   let keyUpListeners = [];
   let loadingEvents = [];
   let resizeEvents = [];
+  globalThis.close = () => {
+    console.log('window.close');
+    appWindow.close();
+    process.exit(0);
+  }
 
   appWindow.on('keyDown', (e) => {
     keyDownListeners.forEach((listener) => {

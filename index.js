@@ -16,6 +16,9 @@ import { createObjectURL, revokeObjectURL, fetchBlobFromUrl } from './blob.js';
 import { Audio } from './audio.js';
 import { Video } from './video.js';
 
+console.log('ARGS', process.argv);
+console.log('ENV', JSON.stringify(process.env));
+
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
   if (err.code === 'EPIPE') {
@@ -135,7 +138,7 @@ globalThis.cancelAnimationFrame = cancelAnimationFrame;
 const options = getOptions();
 let fullscreen = false;
 
-// console.log('options', options);
+console.log('\n----------OPTIONS----------:\n', options, '\n');
 
 const romFile = options.Rom;
 const romDir = path.dirname(romFile);
@@ -162,7 +165,7 @@ if (!gameFile) {
 
 console.log('gameFile', gameFile);
 const romName = path.basename(romDir);
-console.log('options', options, 'gameFile', gameFile, 'romDir', romDir, 'romName', romName);
+console.log('gameFile', gameFile, 'romDir', romDir, 'romName', romName);
 
 if (fs.existsSync(path.join(romDir, 'node_modules'))) {
   Module.globalPaths.push(path.join(romDir, 'node_modules'));
@@ -249,6 +252,7 @@ async function main() {
   canvas.name = 'game canvas';
   // console.log('Pre-import gameWidth', canvas.width , 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
   await import(gameFile);
+  resize();
   // console.log('Post-import gameWidth', canvas.width, 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
   callLoadingEvents();
 
@@ -344,7 +348,7 @@ async function main() {
     setImmediate(launcherLoop);
   }
   
-  initGamepads();
+  await initGamepads(options.Addconcfg);
   launcherLoop();
 
   // Log the FPS (frames per second)

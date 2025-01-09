@@ -1,28 +1,24 @@
-import xml2js from 'xml2js';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import path from 'path';
+import parseCfg from './parse_cfg.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const xmlFile = fs.readFileSync(path.join(__dirname, './es_input.cfg'), 'utf8');
+const xmlFile = path.join(__dirname, './es_input.cfg')
 
+async function createDb() {
+  const cfgList = await parseCfg(xmlFile);
+  fs.writeFileSync(path.join(__dirname, './db.json'), JSON.stringify(cfgList));
+  return cfgList;
+}
 
-const parser = new xml2js.Parser();
-parser.parseString(xmlFile, (err, result) => {
-  const { inputList } = result;
-  const outputList = inputList.inputConfig.map((ic) => {
-    return {
-      name: ic['$'].deviceName.trim(), // no idea why some have trailing spaces
-      type: ic['$'].type,
-      guid: ic['$'].deviceGUID,
-      input: ic.input.map((i) => {
-        return i['$'];
-      }),
-    };
+createDb()
+  .then(() => {
+    console.log('db.json created');
+  })
+  .catch((err) => {
+    console.error('error creating db.json', err);
   });
-  fs.writeFileSync(path.join(__dirname, './db.json'), JSON.stringify(outputList));
-});
-
