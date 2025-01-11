@@ -17,14 +17,15 @@ function getControllerDef(device) {
     // console.log('checking additional controller', c.guid, c.name);
     return (c.guid === device.guid) && (c.name === device.name);
   });
-  console.log('matchedAdditional', matchedAdditional);
+  // console.log('matchedAdditional? :', matchedAdditional);
   if (matchedAdditional?.length) {
-    console.log('matchedAdditional', matchedAdditional);
+    // console.log('matchedAdditional yes', matchedAdditional);
     // last (most recent) one on the list
     return matchedAdditional[matchedAdditional.length - 1];
   }
 
   const matchedGuids = controllerList.filter((c) => c.guid === device.guid);
+  // console.log('matchedGuids? :', matchedGuids.length);
   if (matchedGuids.length > 0) {
     // console.log('matchedGuids', device.name, matchedGuids);
     const matchedGuidAndName = matchedGuids.filter((c) => c.name === device.name);
@@ -47,9 +48,11 @@ function getControllerDef(device) {
         def = c;
       }
     }
+    // console.log('matched def: ', def);
     return def;
   }
   const matchedNames = controllerList.filter((c) => c.name === device.name);
+  // console.log('matchedNames? :', matchedNames.length);
   if (matchedNames.length > 0) {
     def = matchedNames[0];
     for (const c of matchedNames) {
@@ -59,6 +62,7 @@ function getControllerDef(device) {
     }
     return def;
   }
+  // console.log('no matched names or guids', def);
   return def;
 }
 
@@ -87,6 +91,7 @@ const esButtonMap = {
 
 function createJSMap(device) {
   const def = getControllerDef(device);
+  console.log('createJSMap def', def);
   if (!def) {
     return;
   }

@@ -2,6 +2,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 
+
 globalThis.oldFetch = fetch;
 
 export default function createFetch(gameDir) {
@@ -26,7 +27,7 @@ export default function createFetch(gameDir) {
 
     // Construct the file path
     const filePath = path.join(resourcePath, url);
-
+    // const resp = new Response();
     try {
       // Read the file content
       const fileBuffer = await fsPromises.readFile(filePath);
@@ -35,31 +36,22 @@ export default function createFetch(gameDir) {
       const mime = (await import('mime-types')).default;
       const mimeType = mime.lookup(filePath) || 'application/octet-stream';
 
-      // Create a Response-like object
-      return {
-        ok: true,
+      const resp = new Response(fileBuffer, {
         status: 200,
         statusText: 'OK',
         headers: {
           'Content-Type': mimeType,
         },
-        text: () => Promise.resolve(fileBuffer.toString('utf-8')),
-        json: () => Promise.resolve(JSON.parse(fileBuffer.toString('utf-8'))),
-        arrayBuffer: () => Promise.resolve(fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength)),
-        blob: () => Promise.resolve(fileBuffer),
-      };
+      });
+      return resp;
     } catch (err) {
       // Handle file not found or other errors
-      return {
+      const resp = new Response(null, {
         ok: false,
         status: 404,
         statusText: 'Not Found',
-        headers: {},
-        text: () => Promise.resolve(''),
-        json: () => Promise.reject(new SyntaxError('Unexpected end of JSON input')),
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-        blob: () => Promise.resolve(null),
-      };
+      });
+      return resp;
     }
   }
 

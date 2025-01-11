@@ -144,12 +144,12 @@ const romFile = options.Rom;
 const romDir = path.dirname(romFile);
 let gameFile;
 const tryOrder = [
-  ['game.js'],
-  ['src', 'game.js'],
-  ['index.js'],
-  ['src', 'index.js'],
   ['main.js'],
   ['src', 'main.js'],
+  ['index.js'],
+  ['src', 'index.js'],
+  ['game.js'],
+  ['src', 'game.js'],
 ]
 for (const order of tryOrder) {
   const tryGameFile = path.join(romDir, ...order);
@@ -325,7 +325,6 @@ async function main() {
     if (gp) {
       if (gp.buttons[16].pressed) {
         if (gp.buttons[9].pressed) {
-          console.log('exit button pressed', gamepads[0].buttons[16], gamepads[0].buttons[9]);
           console.log('EXITING');
           process.exit(0);
         } else if (gp.buttons[12].pressed) {
