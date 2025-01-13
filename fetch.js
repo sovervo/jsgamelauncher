@@ -35,7 +35,7 @@ export default function createFetch(gameDir) {
       // Guess the MIME type based on file extension
       const mime = (await import('mime-types')).default;
       const mimeType = mime.lookup(filePath) || 'application/octet-stream';
-
+      console.log('MIME TYPE', mimeType, filePath);
       const resp = new Response(fileBuffer, {
         status: 200,
         statusText: 'OK',
@@ -43,6 +43,7 @@ export default function createFetch(gameDir) {
           'Content-Type': mimeType,
         },
       });
+      resp.headers.set('Content-Type', mimeType);
       return resp;
     } catch (err) {
       // Handle file not found or other errors
