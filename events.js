@@ -35,7 +35,6 @@ export default function initialize(appWindow) {
   let resizeEvents = [];
   globalThis.close = () => {
     console.log('window.close');
-    appWindow.close();
     process.exit(0);
   }
 

@@ -13,6 +13,8 @@ The goal is to run games on cheap ($50) retro devices that will also run in brow
 - [x] Keyboard events
 - [x] Gamepad API
 - [x] localStorage
+- [x] Web Assembly
+- [x] Web Workers
 - [ ] WebGL (Canvas 3D)
 
 ## JS Game Engine support

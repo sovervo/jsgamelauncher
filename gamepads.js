@@ -6,6 +6,15 @@ const require = createRequire(import.meta.url);
 const controllerList = require('./controllers/db.json');
 let additionalControllerList = [];
 
+let gamepads = [];
+
+if (!globalThis.navigator) {
+  globalThis.navigator = {};
+}
+globalThis.navigator.getGamepads = () => {
+  // console.log('get gamepads');
+  return gamepads;
+};
 
 function getControllerDef(device) {
   let def;
@@ -91,7 +100,7 @@ const esButtonMap = {
 
 function createJSMap(device) {
   const def = getControllerDef(device);
-  console.log('createJSMap def', def);
+  console.log('createJSMap def', def?.name, def?.guid);
   if (!def) {
     return;
   }
@@ -172,20 +181,7 @@ function createJSMap(device) {
   return JSMap;
 }
 
-const { controller, joystick } = sdl;
 
-// knulli doesn't want me to log to console.log for some reason
-// console.log = console.error;
-
-let gamepads = [];
-
-if (!globalThis.navigator) {
-  globalThis.navigator = {};
-}
-globalThis.navigator.getGamepads = () => {
-  // console.log('get gamepads');
-  return gamepads;
-};
 
 // translates from SDL2 gamepad controller button/axes names to browser standard gamepad button/axes indices
 const stdGamepadMapping = {
@@ -214,70 +210,6 @@ const stdGamepadMapping = {
   'rightTrigger': 5,
 };
 
-// deeplay (RG35XXSP) joystick to browser standard gamepad button indices
-const deeplayJSMap = {
-  buttons: [
-    100, // sdl_idx 0 , ?
-    100, // sdl_idx 1 , ?
-    100, // sdl_idx 2 , ?
-    1, // sdl_idx 3 , b
-    0, // sdl_idx 4 , a
-    2, // sdl_idx 5 , x
-    3, // sdl_idx 6 , y
-    4, // sdl_idx 7 , left shoulder
-    5, // sdl_idx 8 , right shoulder
-    8, // sdl_idx 9 , select
-    9, // sdl_idx 10 , start
-    16, // sdl_idx 11 , guide
-    6, // sdl_idx 12 , left trigger
-    7, // sdl_idx 13 , right trigger
-    16, // sdl_idx 14 , guide again?
-  ],
-}
-
-// anbernic (RG40XXH) joystick to browser standard gamepad button indices
-const anbernicJSMap = {
-  buttons: [
-    100, // sdl_idx 0 , ?
-    100, // sdl_idx 1 , ?
-    100, // sdl_idx 2 , ?
-    1, // sdl_idx 3 , b
-    0, // sdl_idx 4 , a
-    2, // sdl_idx 5 , x
-    3, // sdl_idx 6 , y
-    4, // sdl_idx 7 , left shoulder
-    5, // sdl_idx 8 , right shoulder
-    8, // sdl_idx 9 , select
-    9, // sdl_idx 10 , start
-    16, // sdl_idx 11 , guide
-    10, // sdl_idx 12 , left joystick (L3)
-    6, // sdl_idx 13 , left trigger
-    7, // sdl_idx 14 , right trigger
-    11, // sdl_idx 15 , right joystick (R3)
-  ],
-}
-
-
-// translate SDL2 std joystick button ids to browser standard gamepad button indices
-const stdJoystickMapping = {
-  buttons: [
-    0, // sdl_idx 0 , a
-    1, // sdl_idx 1 , b
-    2, // sdl_idx 2 , x
-    3, // sdl_idx 3 , y
-    8, // sdl_idx 4 , back
-    16, // sdl_idx 5 , guide
-    9, // sdl_idx 6 , start
-    10, // sdl_idx 7 , left stick
-    11, // sdl_idx 8 , right stick
-    4, // sdl_idx 9 , left shoulder
-    5, // sdl_idx 10 , right shoulder
-    12, // sdl_idx 11 , dpad up
-    13, // sdl_idx 12 , dpad down
-    14, // sdl_idx 13 , dpad left
-    15, // sdl_idx 14 , dpad right
-  ],
-}
 
 // xbox 360 "pad" knockoffs that SDL doesn't recognize as a controller
 const xbox360JSMap = {
@@ -356,217 +288,225 @@ const sonyPS4JSMap = {
 };
 
 
-function createGamepad(device, _sdltype) {
-  // const def = getControllerDef(device);
-  // console.log('def', JSON.stringify(def, null, 2));
-  let _jsMap = createJSMap(device);
-  if (!_jsMap) {
-    const lcDev = String(device.name).toLowerCase();
-    if (lcDev.startsWith('anbernic ') || ['deeplay-keys'].includes(lcDev)) {
-      _jsMap = deeplayJSMap;
-    } else if (lcDev.startsWith('anbernic-keys')) {
-      _jsMap = anbernicJSMap;
-    } else if (lcDev.startsWith('sony')) {
-      _jsMap = sonyPS4JSMap;
-    } else {
-      _jsMap = xbox360JSMap;
+
+
+export async function initGamepads(addtionalControllerListFile) {
+
+  const { controller, joystick } = sdl;
+
+  function createGamepad(device, _sdltype) {
+    // const def = getControllerDef(device);
+    // console.log('def', JSON.stringify(def, null, 2));
+    let _jsMap = createJSMap(device);
+    if (!_jsMap) {
+      const lcDev = String(device.name).toLowerCase();
+      if (lcDev.startsWith('sony')) {
+        _jsMap = sonyPS4JSMap;
+      } else {
+        _jsMap = xbox360JSMap;
+      }
+    }
+    
+    return {
+      id: device.name,
+      name: device.name,
+      index: device._index,
+      guid: device.guid,
+      mapping: 'standard',
+      axes: Array(6).fill(0),
+      buttons: Array(17).fill(0).map(() => {
+        return {pressed: false, value: 0}
+      }),
+      _sdltype,
+      _jsMap,
+      device,
     }
   }
   
-  return {
-    id: device.name,
-    name: device.name,
-    index: device._index,
-    guid: device.guid,
-    mapping: 'standard',
-    axes: Array(6).fill(0),
-    buttons: Array(17).fill(0).map(() => {
-      return {pressed: false, value: 0}
-    }),
-    _sdltype,
-    _jsMap,
-    device,
-  }
-}
-
-function addController(device) {
-  let exists = false;
-  gamepads.forEach((gp) => {
-    if (gp.guid === device.guid) {
-      exists = true;
-      console.log('controller already exists', device);
-    }
-  });
-  if (!exists) {
-    console.log('adding controller', device, joystick.devices.length);
-    const gp = createGamepad(device, 'controller');
-    console.log('opening controller', device);
-    const instance = controller.openDevice(device);
-    console.log('controller instance open', instance);
-    if (globalThis._jsg.debug) {
-      const sdlController = {
-        instance,
-        state: {
-          buttons: {...instance.buttons},
-          axes: {...instance.axes},
-        },
-        device,
-      };
-      Object.keys(sdlController.instance).forEach((key) => {
-        sdlController.state[key] = 0;
-      });
-      globalThis._jsg.controllers.push(sdlController);
+  function addController(device) {
+    let exists = false;
+    gamepads.forEach((gp) => {
+      if (gp.guid === device.guid) {
+        exists = true;
+        console.log('controller already exists', device);
+      }
+    });
+    if (!exists) {
+      console.log('adding controller', device, joystick.devices.length);
+      const gp = createGamepad(device, 'controller');
+      console.log('opening controller', device.name, device.guid);
+      const instance = controller.openDevice(device);
+      console.log('controller instance opened');
+      if (globalThis._jsg.debug) {
+        const sdlController = {
+          instance,
+          state: {
+            buttons: {...instance.buttons},
+            axes: {...instance.axes},
+          },
+          device,
+        };
+        Object.keys(sdlController.instance).forEach((key) => {
+          sdlController.state[key] = 0;
+        });
+        globalThis._jsg.controllers.push(sdlController);
+        instance.on('*', (type, e) => {
+          // console.log('controller event', type, e);
+          if (type === 'buttonDown') {
+            sdlController.state.buttons[e.button] = 1;
+          } else if (type === 'buttonUp') {
+            sdlController.state.buttons[e.button] = 0;
+          } else if (type === 'axisMotion') {
+            // console.log('AXIS MOTION', sdlController.state.axes);
+            sdlController.state.axes[e.axis] = e.value;
+          }
+        });
+      }
       instance.on('*', (type, e) => {
         // console.log('controller event', type, e);
         if (type === 'buttonDown') {
-          sdlController.state.buttons[e.button] = 1;
-        } else if (type === 'buttonUp') {
-          sdlController.state.buttons[e.button] = 0;
-        } else if (type === 'axisMotion') {
-          // console.log('AXIS MOTION', sdlController.state.axes);
-          sdlController.state.axes[e.axis] = e.value;
-        }
-      });
-    }
-    instance.on('*', (type, e) => {
-      // console.log('controller event', type, e);
-      if (type === 'buttonDown') {
-        if (stdGamepadMapping[e.button] !== undefined) {
-          const btn = gp.buttons[stdGamepadMapping[e.button]];
-          btn.pressed = true;
-          btn.value = 1;
-        }
-      } else if (type === 'buttonUp') {
-        if (stdGamepadMapping[e.button] !== undefined) {
-          const btn = gp.buttons[stdGamepadMapping[e.button]];
-          btn.pressed = false;
-          btn.value = 0;
-        }
-      } else if (type === 'axisMotion') {
-        if (stdGamepadMapping[e.axis] !== undefined) {
-          gp.axes[stdGamepadMapping[e.axis]] = e.value;
-        }
-        if (e.axis === 'leftTrigger') {
-          gp.buttons[6].value = e.value;
-          gp.buttons[6].pressed = e.value > 0.11;
-        } else if (e.axis === 'rightTrigger') {
-          gp.buttons[7].value = e.value;
-          gp.buttons[7].pressed = e.value > 0.11;
-        }
-      }
-      // console.log('gamepad', gp);
-    });
-    gamepads.push(gp);
-  }
-  
-}
-
-function addJoystick(device) {
-  let exists = false;
-  gamepads.forEach((gp) => {
-    if (gp.guid === device.guid) {
-      exists = true;
-      console.log('joystick already exists', device);
-    }
-  });
-  if (!exists) {
-    console.log('adding joystick', device, joystick.devices.length);
-    const gp = createGamepad(device, 'joystick');
-    console.log('opening joystick', device);
-    const instance = joystick.openDevice(device);
-    console.log('joystick instance open', instance, instance.buttons, instance.axes, instance.hats);
-    if (globalThis._jsg.debug) {
-      const sdlJoystick = {
-        instance,
-        device,
-        state: {
-          buttons: [...instance.buttons].map((b) => b ? 1 : 0),
-          axes: [...instance.axes],
-          hats: [...instance.hats],
-        },
-      };
-      instance.on('*', (type, e) => {
-        // console.log('joystick event', type, e);
-        if (type === 'buttonDown') {
-          sdlJoystick.state.buttons[e.button] = 1;
-        } else if (type === 'buttonUp') {
-          sdlJoystick.state.buttons[e.button] = 0;
-        }
-        if (type === 'axisMotion') {
-          sdlJoystick.state.axes[e.axis] = e.value;
-        }
-        if (type === 'hatMotion') {
-          sdlJoystick.state.hats[e.hat] = e.value;
-        }
-      });
-      globalThis._jsg.joysticks.push(sdlJoystick);
-    }
-    instance.on('*', (type, e) => {
-      // console.log('JOYSTICK event', type, e);
-      if (type === 'buttonDown') {
-        if (gp._jsMap.buttons[e.button] !== undefined) {
-          // console.log('button down', e.button, gp._jsMap[e.button]);
-          const btn = gp.buttons[gp._jsMap.buttons[e.button]];
-          if (btn) {
+          if (stdGamepadMapping[e.button] !== undefined) {
+            const btn = gp.buttons[stdGamepadMapping[e.button]];
             btn.pressed = true;
             btn.value = 1;
           }
-        }
-      } else if (type === 'buttonUp') {
-        if (gp._jsMap.buttons[e.button] !== undefined) {
-          // console.log('button up', e.button, gp._jsMap[e.button]);
-          const btn = gp.buttons[gp._jsMap.buttons[e.button]];
-          if (btn) {
+        } else if (type === 'buttonUp') {
+          if (stdGamepadMapping[e.button] !== undefined) {
+            const btn = gp.buttons[stdGamepadMapping[e.button]];
             btn.pressed = false;
             btn.value = 0;
           }
+        } else if (type === 'axisMotion') {
+          if (stdGamepadMapping[e.axis] !== undefined) {
+            gp.axes[stdGamepadMapping[e.axis]] = e.value;
+          }
+          if (e.axis === 'leftTrigger') {
+            gp.buttons[6].value = e.value;
+            gp.buttons[6].pressed = e.value > AXIS_THRESHOLD;
+          } else if (e.axis === 'rightTrigger') {
+            gp.buttons[7].value = e.value;
+            gp.buttons[7].pressed = e.value > AXIS_THRESHOLD;
+          }
         }
-      } else if (type === 'axisMotion') {
-        if (gp._jsMap.axesHandler) {
-          gp._jsMap.axesHandler(gp, e);
-          return;
-        }
-        gp.axes[e.axis] = e.value;
-        if (e.axis === 4) {
-          let val = (e.value + 1) / 2;
-          gp.buttons[6].value = val;
-          gp.buttons[6].pressed = val > 0.11;
-        } else if (e.axis === 5) {
-          let val = (e.value + 1) / 2;
-          gp.buttons[7].value = val;
-          gp.buttons[7].pressed = val > 0.11;
-        }
-      } else if (type === 'hatMotion' && e.hat === 0) {
-        
-        if (e.value === 'up') {
-          gp.buttons[12].pressed = true;
-          gp.buttons[12].value = 1;
-        } else if (e.value === 'down') {
-          gp.buttons[13].pressed = true;
-          gp.buttons[13].value = 1;
-        } else if (e.value === 'left') {
-          gp.buttons[14].pressed = true;
-          gp.buttons[14].value = 1;
-        } else if (e.value === 'right') {
-          gp.buttons[15].pressed = true;
-          gp.buttons[15].value = 1;
-        } else if (e.value === 'centered') {
-          gp.buttons[12].pressed = false;
-          gp.buttons[12].value = 0;
-          gp.buttons[13].pressed = false;
-          gp.buttons[13].value = 0;
-          gp.buttons[14].pressed = false;
-          gp.buttons[14].value = 0;
-          gp.buttons[15].pressed = false;
-          gp.buttons[15].value = 0;
-        }
+        // console.log('gamepad', gp);
+      });
+      gamepads.push(gp);
+    }
+    
+  }
+  
+  function addJoystick(device) {
+    let exists = false;
+    gamepads.forEach((gp) => {
+      if (gp.guid === device.guid) {
+        exists = true;
+        console.log('joystick already exists', device);
       }
     });
-    gamepads.push(gp);
-  }
-}
+    if (!exists) {
+      console.log('adding joystick', device.name, device.guid);
+      const gp = createGamepad(device, 'joystick');
+      console.log('opening joystick', device.name, device.guid);
+      const instance = joystick.openDevice(device);
+      console.log('joystick instance opened');
+      if (globalThis._jsg.debug) {
+        const sdlJoystick = {
+          instance,
+          device,
+          state: {
+            buttons: [...instance.buttons].map((b) => b ? 1 : 0),
+            axes: [...instance.axes],
+            hats: [...instance.hats],
+          },
+        };
+        instance.on('*', (type, e) => {
+          // console.log('joystick event', type, e);
+          if (type === 'buttonDown') {
+            sdlJoystick.state.buttons[e.button] = 1;
+          } else if (type === 'buttonUp') {
+            sdlJoystick.state.buttons[e.button] = 0;
+          }
+          if (type === 'axisMotion') {
+            sdlJoystick.state.axes[e.axis] = e.value;
+          }
+          if (type === 'hatMotion') {
+            sdlJoystick.state.hats[e.hat] = e.value;
+          }
+        });
+        globalThis._jsg.joysticks.push(sdlJoystick);
+      }
+      instance.on('*', (type, e) => {
+        // console.log('JOYSTICK event', type, e);
+        const btns = gp.buttons;
+        if (type === 'buttonDown') {
+          if (gp._jsMap.buttons[e.button] !== undefined) {
+            // console.log('button down', e.button, gp._jsMap[e.button]);
+            const btn = btns[gp._jsMap.buttons[e.button]];
+            if (btn) {
+              btn.pressed = true;
+              btn.value = 1;
+            }
+          }
+        } else if (type === 'buttonUp') {
+          if (gp._jsMap.buttons[e.button] !== undefined) {
+            // console.log('button up', e.button, gp._jsMap[e.button]);
+            const btn = btns[gp._jsMap.buttons[e.button]];
+            if (btn) {
+              btn.pressed = false;
+              btn.value = 0;
+            }
+          }
+        } else if (type === 'axisMotion') {
+          if (gp._jsMap.axesHandler) {
+            gp._jsMap.axesHandler(gp, e);
+            return;
+          }
+          gp.axes[e.axis] = e.value;
+          if (e.axis === 4) {
+            let val = (e.value + 1) / 2;
+            btns[6].value = val;
+            btns[6].pressed = val > 0.11;
+          } else if (e.axis === 5) {
+            let val = (e.value + 1) / 2;
+            btns[7].value = val;
+            btns[7].pressed = val > 0.11;
+          }
+        } else if (type === 'hatMotion' && e.hat === 0) {
+          let btnSet;
+          if (e.value === 'up') {
+            btnSet = [1, 0, 0, 0];
+          } else if (e.value === 'down') {
+            btnSet = [0, 1, 0, 0];
+          } else if (e.value === 'left') {
+            btnSet = [0, 0, 1, 0];
+          } else if (e.value === 'right') {
+            btnSet = [0, 0, 0, 1];
+          } else if (e.value === 'centered') {
+            btnSet = [0, 0, 0, 0];
+          } else if (e.value === 'rightdown') {
+            btnSet = [0, 1, 0, 1];
+          } else if (e.value === 'rightup') {
+            btnSet = [1, 0, 0, 1];
+          } else if (e.value === 'leftdown') {
+            btnSet = [0, 1, 1, 0];
+          } else if (e.value === 'leftup') {
+            btnSet = [1, 0, 1, 0];
+          }
 
-export async function initGamepads(addtionalControllerListFile) {
+          btns[12].value = btnSet[0];
+          btns[12].pressed = btnSet[0] === 1;
+          btns[13].value = btnSet[1];
+          btns[13].pressed = btnSet[1] === 1;
+          btns[14].value = btnSet[2];
+          btns[14].pressed = btnSet[2] === 1;
+          btns[15].value = btnSet[3];
+          btns[15].pressed = btnSet[3] === 1;
+        }
+      });
+      gamepads.push(gp);
+    }
+  }
+
 
   if (addtionalControllerListFile) {
     try {
