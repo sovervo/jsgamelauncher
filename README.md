@@ -4,7 +4,9 @@
 
 A compatibly layer for JavaScript games to run WITHOUT a browser or electron using standard web APIs.
 
-The goal is to run games on cheap ($50) retro devices that will also run in browsers without any changes. Anything that runs Knulli and has wifi (so Ambernic XX devices as well as TrimUI Smart Pro) should work but that's just the beginning!
+The goal is to run games on cheap ($50) retro devices (or even not so cheap ones as long as they run Linux . . . for now!) that will also run in browsers without any changes.
+
+Right now we have support for anything that runs [Knulli](https://knulli.org/) and has wifi (so Ambernic XX devices and TrimUI Smart Pro) as well as [Batocera](https://batocera.org/) (which can just be a old PC, a Raspberry Pi, or a ton of other handheld devices) or [ROCKNIX](https://rocknix.org/) which has a long list of supported devices.
 
 ### Browser APIs progress
 
@@ -13,7 +15,7 @@ The goal is to run games on cheap ($50) retro devices that will also run in brow
 - [x] Keyboard events
 - [x] Gamepad API
 - [x] localStorage
-- [x] Web Assembly
+- [x] Web Assembly (WASM)
 - [x] Web Workers
 - [ ] WebGL (Canvas 3D)
 
@@ -39,18 +41,34 @@ Others might work we just haven't tried them! Let us know if you try them!
 
 You can also just run the game directly without using jsgamelauncher. The goal is to make web games that also work on a low end device but the web is a first class citizen. Check out the [Simple Vite](https://github.com/monteslu/jsgames/tree/main/simple-vite) example.
 
+## Notes on Installing to a device
+
+For now we only support downloading the latest version of jsgamelaucher. At some point we might modify the download script to accommodate downloading specific published versions. Same goes for the different firmware versions you see below . . . generally you will need the latest.
+
 ## Installing on [Knulli](https://knulli.org/) or [Batocera](https://batocera.org/)
 
-### Option A) Use the install script [(src)](https://github.com/monteslu/jsgamelauncher/blob/main/installers/install-batocera-knulli.sh)!
+### Use the install script [(src)](https://github.com/monteslu/jsgamelauncher/blob/main/installers/install-batocera-knulli.sh)!
 
 - Make sure wifi is turned on for your Knulli device or you are otherwise connected to the internet on a Batocera device
 - `ssh root@<myDevice>` (default password: linux, default device name : KNULLI or BATOCERA, use IP from device or <myDevice>.local if name fails)
 - `curl -o- https://raw.githubusercontent.com/monteslu/jsgamelauncher/main/installers/install-batocera-knulli.sh | bash`
-- That's it! Now you need a [game](https://github.com/monteslu/jsgames)! Just put that in `/userdata/roms/jsgames` if you are on Knulli. All you need is a game.js file as a starting point and a file called "&lt;game name&gt;.jsg". This could change!
+- That's it! Update the games list! Now you need a [game](https://github.com/monteslu/jsgames)! Just put that in `/userdata/roms/jsgames` if you are using the default setup. All you need is a `game.js` file as a starting point and a file called "&lt;game name&gt;.jsg". This could change!
 
-For now we only support downloading the latest. At some point we'll modify the download script to accommodate downloading specific published versions.
+## Installing on [ROCKNIX](https://rocknix.org/)
 
-### Option B) The long way (leaving this here for reference for other systems)
+### Use the install script [(src)](https://github.com/monteslu/jsgamelauncher/blob/main/installers/install-rocknix.sh)!
+
+- Make sure wifi is turned on and connected to the internet
+- Make sure you enable ssh on your device
+- `ssh root@<myDevice>` (default password: rocknix, default device name depends on the device, for the retroid pocket 5 it was `SD865` (which is the name of the chipset). You can also just ssh `root@<IP>`.
+- `curl -o- https://raw.githubusercontent.com/monteslu/jsgamelauncher/main/installers/install-rocknix.sh | bash`
+- That's it! Update the games list! Now you need a [game](https://github.com/monteslu/jsgames)! Just put that in `/roms/jsgames`. All you need is a game.js file as a starting point and a file called "&lt;game name&gt;.jsg". This could change!
+
+## Installing on [muOS](https://muos.dev/)
+
+Coming soon! According to [joyrider3774](https://www.reddit.com/user/joyrider3774/) on this [thread](https://www.reddit.com/r/ANBERNIC/comments/1hsyv9n/comment/m5e2zsy/?context=3) all we need to do is install the GNU versions of ls and tar so that the curl command for installing nvm works.
+
+## The long way (leaving this here for reference for other systems)
 
 - Make sure wifi is turned on for your Knulli device
 - `ssh root@<myKnullidevice>` (default password: linux, default device name : KNULLI, use IP from device if name fails)
@@ -60,18 +78,14 @@ For now we only support downloading the latest. At some point we'll modify the d
 - `nvm install 22`
 - If you did npm install in jsgamelauncher on your local machine, delete the node_modules directory
 - Copy this directory (jsgamelauncher) to `/userdata/system` on the knulli device (using the SMB share at \\<myKnullidevice>\share\system, or SFTP, etc)
-- `chmod +x ~/jsgamelauncher/knulli/run.sh`
-- `cp ~/jsgamelauncher/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/`
+- `chmod +x ~/jsgamelauncher/systems/knulli/run.sh`
+- `cp ~/jsgamelauncher/systems/knulli/es_systems_jsgames.cfg ~/configs/emulationstation/`
 - `mkdir /userdata/roms/jsgames`
 - `cd ~/jsgamelauncher`
 - `npm install`
 - Copy any "roms" to jsgames (can do this with samba, ftp, or onto the SD card, note that if you connected via Samba, you might have to force a refresh of the Samba share)
 - Restart the system
 - ENJOY!
-
-## Installing on [muOS](https://muos.dev/)
-
-Coming soon! According to [joyrider3774](https://www.reddit.com/user/joyrider3774/) on this [thread](https://www.reddit.com/r/ANBERNIC/comments/1hsyv9n/comment/m5e2zsy/?context=3) all we need to do is install the GNU versions of ls and tar so that the curl command for installing nvm works.
 
 ## Media
 
