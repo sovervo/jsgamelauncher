@@ -99,10 +99,15 @@ if my_distro_check; then
   cd ~/jsbin
 
   # Go get ffmpeg
-  curl -O -L https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-6/ffmpeg
-  curl -O -L https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-6/ffplay
-  curl -O -L https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-6/ffprobe
-
+  if [ -f "$HOME/jsbin/ffmpeg" ]; then
+    my_echo "=> Note: You already have ffmpeg in jsbin, no need to download"
+  else
+    my_echo "=> Note: You do NOT have ffmpeg in jsbin, downloading"
+    curl -O -L https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-6/ffmpeg
+    curl -O -L https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-6/ffplay
+    curl -O -L https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-6/ffprobe
+  fi
+  
   chmod +x ~/jsbin/ffmpeg
   chmod +x ~/jsbin/ffplay
   chmod +x ~/jsbin/ffprobe
@@ -120,7 +125,7 @@ if my_distro_check; then
   nvm install 22
 
   # Clean up after move
-  rm newjsgamelaunchermain.zip
+  rm ~/newjsgamelaunchermain.zip
 
   chmod +x ~/jsgamelauncher/systems/rocknix/run.sh
   cp ~/jsgamelauncher/systems/rocknix/es_systems_jsgames.cfg /storage/.config/emulationstation/
