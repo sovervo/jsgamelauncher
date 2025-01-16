@@ -137,6 +137,7 @@ if my_distro_check; then
   fi
 
   source ~/.bash_profile
+  nvm use 22
   cd ~/jsgamelauncher
   npm install
   my_echo "=> INSTALL SUCCESSFUL!"
