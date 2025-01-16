@@ -1,7 +1,7 @@
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
-
+import mime from 'mime-types';
 
 globalThis.oldFetch = fetch;
 
@@ -33,7 +33,6 @@ export default function createFetch(gameDir) {
       const fileBuffer = await fsPromises.readFile(filePath);
 
       // Guess the MIME type based on file extension
-      const mime = (await import('mime-types')).default;
       const mimeType = mime.lookup(filePath) || 'application/octet-stream';
       console.log('MIME TYPE', mimeType, filePath);
       const resp = new Response(fileBuffer, {
@@ -47,6 +46,7 @@ export default function createFetch(gameDir) {
       return resp;
     } catch (err) {
       // Handle file not found or other errors
+      console.error('Error fetching file', filePath);
       const resp = new Response(null, {
         ok: false,
         status: 404,

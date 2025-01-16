@@ -242,7 +242,7 @@ const drawFPS = (ctx) => {
   ctx.fillStyle = 'yellow';
   ctx.strokeStyle = 'black';
   ctx.lineWidth = 1;
-  ctx.font = `${size}px Arial`;
+  ctx.font = `bold ${size}px Arial`;
   ctx.fillText('FPS: ' + fps, size / 2, size * 1.5);
   ctx.strokeText('FPS: ' + fps, size / 2, size * 1.5);
   ctx.restore();
@@ -474,6 +474,7 @@ async function main() {
     try {
       console.log(fps, 'FPS',
         'window.WxH', backCanvas.width, backCanvas.height,
+        'canvas.WxH', canvas.width, canvas.height,
         'drawImage', Number(imageDrawTime / callCount).toFixed(5),
         'game stretched', scaledGameWidth, scaledGameHeight,
         'game.callback', Number(callbackTime / callCount).toFixed(5),
