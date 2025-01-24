@@ -1,34 +1,34 @@
-import sdl from "@kmamal/sdl";
-import path from "path";
-import Module from "module";
-import fs from "fs";
-import nrsc, { ImageData } from "@napi-rs/canvas";
-import Worker from "web-worker";
-import getOptions from "./options.js";
-import { initGamepads } from "./gamepads.js";
-import { createCanvas, OffscreenCanvas } from "./canvas.js";
-import { createImageClass, createLoadImage } from "./image.js";
-import createLocalStorage from "./localstorage.js";
-import initializeEvents from "./events.js";
+import sdl from '@kmamal/sdl';
+import path from 'path';
+import Module from 'module';
+import fs from 'fs';
+import nrsc, { ImageData } from '@napi-rs/canvas';
+import Worker from 'web-worker';
+import getOptions from './options.js';
+import { initGamepads } from './gamepads.js';
+import { createCanvas, OffscreenCanvas } from './canvas.js';
+import { createImageClass, createLoadImage } from './image.js';
+import createLocalStorage from './localstorage.js';
+import initializeEvents from './events.js';
 import {
   AudioContext,
   AudioDestinationNode,
   OscillatorNode,
   GainNode,
   AudioBuffer,
-} from "webaudio-node";
-import createFetch from "./fetch.js";
-import createXMLHttpRequest from "./xhr.js";
-import { createObjectURL, revokeObjectURL, fetchBlobFromUrl } from "./blob.js";
-import { Audio } from "./audio.js";
-import { Video } from "./video.js";
+} from 'webaudio-node';
+import createFetch from './fetch.js';
+import createXMLHttpRequest from './xhr.js';
+import { createObjectURL, revokeObjectURL, fetchBlobFromUrl } from './blob.js';
+import { Audio } from './audio.js';
+import { Video } from './video.js';
 
-console.log("ARGS", process.argv);
-console.log("ENV", JSON.stringify(process.env));
+console.log('ARGS', process.argv);
+console.log('ENV', JSON.stringify(process.env));
 
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
-  if (err.code === "EPIPE") {
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  if (err.code === 'EPIPE') {
     // console.log('EPIPE');
     // process.exit(0);
     return;
@@ -56,7 +56,7 @@ console.error = (...args) => {
 
 globalThis.global = globalThis;
 globalThis.self = globalThis;
-console.log("LAUNCHING....");
+console.log('LAUNCHING....');
 // console.log('@napi-rs/canvas capabilities', Object.keys(nrsc));
 // console.log('@kmamal/sdl capabilities', Object.keys(sdl));
 let canvas;
@@ -79,17 +79,17 @@ const document = {
     return canvas;
   },
   createElement: (name) => {
-    console.log("DCOUMENT.createElement", name);
-    if (name === "canvas") {
+    console.log('DCOUMENT.createElement', name);
+    if (name === 'canvas') {
       return createCanvas(300, 150);
     }
-    if (name === "image" && globalThis.Image) {
+    if (name === 'image' && globalThis.Image) {
       return new globalThis.Image();
     }
-    if (name === "video" && globalThis.Video) {
+    if (name === 'video' && globalThis.Video) {
       return new globalThis.Video();
     }
-    if (name === "audio" && globalThis.Audio) {
+    if (name === 'audio' && globalThis.Audio) {
       return new globalThis.Audio();
     }
     return {};
@@ -108,9 +108,9 @@ const document = {
     },
   },
   documentElement: {},
-  readyState: "complete",
+  readyState: 'complete',
   currentScript: {
-    src: "",
+    src: '',
   },
 };
 globalThis.document = document;
@@ -148,18 +148,18 @@ globalThis.cancelAnimationFrame = cancelAnimationFrame;
 
 const options = getOptions();
 
-console.log("\n----------OPTIONS----------:\n", options, "\n");
+console.log('\n----------OPTIONS----------:\n', options, '\n');
 
 const romFile = options.Rom;
 const romDir = path.dirname(romFile);
 let gameFile;
 const tryOrder = [
-  ["main.js"],
-  ["src", "main.js"],
-  ["index.js"],
-  ["src", "index.js"],
-  ["game.js"],
-  ["src", "game.js"],
+  ['main.js'],
+  ['src', 'main.js'],
+  ['index.js'],
+  ['src', 'index.js'],
+  ['game.js'],
+  ['src', 'game.js'],
 ];
 for (const order of tryOrder) {
   const tryGameFile = path.join(romDir, ...order);
@@ -169,19 +169,19 @@ for (const order of tryOrder) {
   }
 }
 if (!gameFile) {
-  console.error("game.js file not found");
+  console.error('game.js file not found');
   process.exit(1);
 }
 
-console.log("gameFile", gameFile);
+console.log('gameFile', gameFile);
 const romName = path.basename(romDir);
-console.log("gameFile", gameFile, "romDir", romDir, "romName", romName);
+console.log('gameFile', gameFile, 'romDir', romDir, 'romName', romName);
 
-if (fs.existsSync(path.join(romDir, "node_modules"))) {
-  Module.globalPaths.push(path.join(romDir, "node_modules"));
+if (fs.existsSync(path.join(romDir, 'node_modules'))) {
+  Module.globalPaths.push(path.join(romDir, 'node_modules'));
   // console.log(Module.globalPaths);
 }
-console.log("creating rom specific globals", romDir);
+console.log('creating rom specific globals', romDir);
 globalThis.loadImage = createLoadImage(romDir);
 globalThis.Image = createImageClass(romDir);
 globalThis.fetch = createFetch(romDir);
@@ -226,26 +226,26 @@ const resize = () => {
   }
   globalThis.innerWidth = pixelWidth;
   globalThis.innerHeight = pixelHeight;
-  const backCtx = backCanvas.getContext("2d");
+  const backCtx = backCanvas.getContext('2d');
   backCtx.imageSmoothingEnabled = false;
-  backCtx.fillStyle = "white";
+  backCtx.fillStyle = 'white';
   const fontSize = pixelWidth / 25;
   backCtx.font = `${fontSize}px Arial`;
   backCtx.fillText(
-    "Loading...",
+    'Loading...',
     pixelWidth / 2 - fontSize * 5,
-    pixelHeight / 2
+    pixelHeight / 2,
   );
   appWindow.render(
     pixelWidth,
     pixelHeight,
     stride,
-    "rgba32",
-    Buffer.from(backCanvas.data().buffer)
+    'rgba32',
+    Buffer.from(backCanvas.data().buffer),
   );
   // backCanvas = new Canvas(pixelWidth, pixelHeight);
-  console.log("resize", pixelWidth, pixelHeight);
-  backCanvas.name = "backCanvas";
+  console.log('resize', pixelWidth, pixelHeight);
+  backCanvas.name = 'backCanvas';
   scaledGameWidth = null;
   scaledGameHeight = null;
   fpsFontSize = pixelHeight / 25;
@@ -254,41 +254,41 @@ const resize = () => {
 const drawFPS = (ctx) => {
   const size = ctx.canvas.width / 30;
   ctx.save();
-  ctx.fillStyle = "yellow";
-  ctx.strokeStyle = "black";
+  ctx.fillStyle = 'yellow';
+  ctx.strokeStyle = 'black';
   ctx.lineWidth = 1;
   ctx.font = `bold ${size}px Arial`;
-  ctx.fillText("FPS: " + fps, size / 2, size * 1.5);
-  ctx.strokeText("FPS: " + fps, size / 2, size * 1.5);
+  ctx.fillText('FPS: ' + fps, size / 2, size * 1.5);
+  ctx.strokeText('FPS: ' + fps, size / 2, size * 1.5);
   ctx.restore();
 };
 async function main() {
   console.log(
-    "fullscreen",
+    'fullscreen',
     fullscreen,
-    "showFPS",
+    'showFPS',
     showFPS,
-    "integerScaling",
-    integerScaling
+    'integerScaling',
+    integerScaling,
   );
   appWindow = sdl.video.createWindow({ resizable: true, fullscreen });
-  console.log("appWindow CREATED", appWindow.pixelWidth, appWindow.pixelHeight);
+  console.log('appWindow CREATED', appWindow.pixelWidth, appWindow.pixelHeight);
   fpsFontSize = appWindow.pixelHeight / 25;
 
   await new Promise((resolve) => {
     setTimeout(() => {
-      appWindow.setTitle("canvas game");
+      appWindow.setTitle('canvas game');
       appWindow.setFullscreen(fullscreen);
       console.log(
-        "calling resize",
+        'calling resize',
         appWindow.pixelWidth,
-        appWindow.pixelHeight
+        appWindow.pixelHeight,
       );
       resize();
       resolve();
     }, 100);
   });
-  console.log("appWindow RESIZED", appWindow.pixelWidth, appWindow.pixelHeight);
+  console.log('appWindow RESIZED', appWindow.pixelWidth, appWindow.pixelHeight);
   const eventHandlers = initializeEvents(appWindow);
   callResizeEvents = eventHandlers.callResizeEvents;
   if (setCanvasSizeToWindow) {
@@ -300,15 +300,15 @@ async function main() {
   gameHeight = canvas.height;
   globalThis.innerWidth = appWindow.pixelWidth;
   globalThis.innerHeight = appWindow.pixelHeight;
-  console.log("canvas", canvas.width, canvas.height);
+  console.log('canvas', canvas.width, canvas.height);
   if (!canvas.addEventListener) {
     canvas.addEventListener = (a) => {
-      console.log("canvas.addEventListener", a);
+      console.log('canvas.addEventListener', a);
     };
   }
   if (!canvas.removeEventListener) {
     canvas.removeEventListener = (a) => {
-      console.log("canvas.removeEventListener", a);
+      console.log('canvas.removeEventListener', a);
     };
   }
   if (!canvas.getBoundingClientRect) {
@@ -321,22 +321,21 @@ async function main() {
       };
     };
   }
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
-  canvas.name = "game canvas";
+  canvas.name = 'game canvas';
   console.log(
-    "Pre-import gameWidth",
+    'Pre-import gameWidth',
     canvas.width,
-    "gameHeight",
+    'gameHeight',
     canvas.height,
-    "prevGameWidth",
+    'prevGameWidth',
     prevGameWidth,
-    "prevGameHeight",
-    prevGameHeight
+    'prevGameHeight',
+    prevGameHeight,
   );
 
-  await import("file://" + gameFile);
-
+  await import('file://' + gameFile);
   // if (os.platform() === 'win32') {
   //   await import("file://" + gameFile);
   // } else {
@@ -364,10 +363,10 @@ async function main() {
     const { pixelWidth: windowWidth, pixelHeight: windowHeight } = appWindow;
     if (!backCanvas) {
       stride = windowWidth * 4;
-      console.log("windowWidth", windowWidth, "windowWidth", windowWidth);
+      console.log('windowWidth', windowWidth, 'windowWidth', windowWidth);
       backCanvas = createCanvas(windowWidth, windowWidth);
     }
-    const backCtx = backCanvas.getContext("2d");
+    const backCtx = backCanvas.getContext('2d');
     backCtx.imageSmoothingEnabled = false;
     // console.log('gameWidth', gameWidth, 'gameHeight', gameHeight, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
 
@@ -375,7 +374,7 @@ async function main() {
       (windowWidth < gameWidth || windowHeight < gameHeight) &&
       integerScaling
     ) {
-      console.log("NOT rednering to window", windowWidth, windowHeight);
+      console.log('NOT rednering to window', windowWidth, windowHeight);
       return;
     }
 
@@ -405,28 +404,28 @@ async function main() {
       scaledGameHeight = gameHeight * gameScale;
       paintPosX = (windowWidth - scaledGameWidth) / 2;
       paintPosY = (windowHeight - scaledGameHeight) / 2;
-      backCtx.strokeStyle = "white";
+      backCtx.strokeStyle = 'white';
       backCtx.lineWidth = 1;
       backCtx.imageSmoothingEnabled = false;
       backCtx.strokeRect(
         paintPosX,
         paintPosY,
         scaledGameWidth,
-        scaledGameHeight
+        scaledGameHeight,
       );
       console.log(
-        "SCALING scaledGameWidth",
+        'SCALING scaledGameWidth',
         scaledGameWidth,
-        "scaledGameHeight",
+        'scaledGameHeight',
         scaledGameHeight,
-        "paintPosX",
+        'paintPosX',
         paintPosX,
-        "paintPosY",
+        'paintPosY',
         paintPosY,
-        "gameWidth",
+        'gameWidth',
         gameWidth,
-        "gameHeight",
-        gameHeight
+        'gameHeight',
+        gameHeight,
       );
     }
 
@@ -450,7 +449,7 @@ async function main() {
           paintPosX,
           paintPosY,
           scaledGameWidth,
-          scaledGameHeight
+          scaledGameHeight,
         );
         drawFPS(backCtx);
       } else {
@@ -459,7 +458,7 @@ async function main() {
           paintPosX,
           paintPosY,
           scaledGameWidth,
-          scaledGameHeight
+          scaledGameHeight,
         );
       }
     }
@@ -480,18 +479,18 @@ async function main() {
       backCanvas.width,
       backCanvas.height,
       stride,
-      "rgba32",
-      buffer
+      'rgba32',
+      buffer,
     );
     windowRenderTime += performance.now() - startWindowRenderTime;
   }
 
-  appWindow.on("close", () => {
-    console.log("window closed");
+  appWindow.on('close', () => {
+    console.log('window closed');
     process.exit(0);
   });
 
-  appWindow.on("resize", () => {
+  appWindow.on('resize', () => {
     // const error = new Error('resize called');
     // console.log(error.stack); // Print the stack trace
     resize();
@@ -514,7 +513,7 @@ async function main() {
       // handle hotkey input
       if (btns[16].pressed) {
         if (btns[9].pressed) {
-          console.log("EXITING");
+          console.log('EXITING');
           process.exit(0);
         }
 
@@ -529,7 +528,7 @@ async function main() {
 
         if (btns[13].pressed && canToggleFPS) {
           showFPS = !showFPS;
-          console.log("showFPS", showFPS);
+          console.log('showFPS', showFPS);
           canToggleFPS = false;
           resize();
         } else if (!btns[13].pressed) {
@@ -538,7 +537,7 @@ async function main() {
 
         if (btns[14].pressed && canToggleIntegerScaling) {
           integerScaling = !integerScaling;
-          console.log("integerScaling", integerScaling);
+          console.log('integerScaling', integerScaling);
           canToggleIntegerScaling = false;
           resize();
         } else if (!btns[14].pressed) {
@@ -568,24 +567,24 @@ async function main() {
     try {
       console.log(
         fps,
-        "FPS",
-        "window.WxH",
+        'FPS',
+        'window.WxH',
         backCanvas.width,
         backCanvas.height,
-        "canvas.WxH",
+        'canvas.WxH',
         canvas.width,
         canvas.height,
-        "drawImage",
+        'drawImage',
         Number(imageDrawTime / callCount).toFixed(5),
-        "game stretched",
+        'game stretched',
         scaledGameWidth,
         scaledGameHeight,
-        "game.callback",
+        'game.callback',
         Number(callbackTime / callCount).toFixed(5),
-        "game.scale",
+        'game.scale',
         gameScale,
-        "window.render",
-        Number(windowRenderTime / callCount).toFixed(5)
+        'window.render',
+        Number(windowRenderTime / callCount).toFixed(5),
       );
     } catch (e) {
       console.error(e);
