@@ -2,5 +2,5 @@
   "removeParens": false,
   "semi": true,
   "singleQuote": true,
-  "printWidth": 140
+  "printWidth": 180
 }

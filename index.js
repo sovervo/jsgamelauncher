@@ -290,16 +290,7 @@ async function main() {
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   canvas.name = 'game canvas';
-  console.log(
-    'Pre-import gameWidth',
-    canvas.width,
-    'gameHeight',
-    canvas.height,
-    'prevGameWidth',
-    prevGameWidth,
-    'prevGameHeight',
-    prevGameHeight,
-  );
+  console.log('Pre-import gameWidth', canvas.width, 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
 
   //added file:// to fix issue with windows, tested on windows 10, macos, and linux/knulli
   await import('file://' + gameFile);
