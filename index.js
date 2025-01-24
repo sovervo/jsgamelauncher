@@ -10,13 +10,7 @@ import { createCanvas, OffscreenCanvas } from './canvas.js';
 import { createImageClass, createLoadImage } from './image.js';
 import createLocalStorage from './localstorage.js';
 import initializeEvents from './events.js';
-import {
-  AudioContext,
-  AudioDestinationNode,
-  OscillatorNode,
-  GainNode,
-  AudioBuffer,
-} from 'webaudio-node';
+import { AudioContext, AudioDestinationNode, OscillatorNode, GainNode, AudioBuffer } from 'webaudio-node';
 import createFetch from './fetch.js';
 import createXMLHttpRequest from './xhr.js';
 import { createObjectURL, revokeObjectURL, fetchBlobFromUrl } from './blob.js';
@@ -153,14 +147,7 @@ console.log('\n----------OPTIONS----------:\n', options, '\n');
 const romFile = options.Rom;
 const romDir = path.dirname(romFile);
 let gameFile;
-const tryOrder = [
-  ['main.js'],
-  ['src', 'main.js'],
-  ['index.js'],
-  ['src', 'index.js'],
-  ['game.js'],
-  ['src', 'game.js'],
-];
+const tryOrder = [['main.js'], ['src', 'main.js'], ['index.js'], ['src', 'index.js'], ['game.js'], ['src', 'game.js']];
 for (const order of tryOrder) {
   const tryGameFile = path.join(romDir, ...order);
   if (fs.existsSync(tryGameFile)) {
@@ -231,18 +218,8 @@ const resize = () => {
   backCtx.fillStyle = 'white';
   const fontSize = pixelWidth / 25;
   backCtx.font = `${fontSize}px Arial`;
-  backCtx.fillText(
-    'Loading...',
-    pixelWidth / 2 - fontSize * 5,
-    pixelHeight / 2,
-  );
-  appWindow.render(
-    pixelWidth,
-    pixelHeight,
-    stride,
-    'rgba32',
-    Buffer.from(backCanvas.data().buffer),
-  );
+  backCtx.fillText('Loading...', pixelWidth / 2 - fontSize * 5, pixelHeight / 2);
+  appWindow.render(pixelWidth, pixelHeight, stride, 'rgba32', Buffer.from(backCanvas.data().buffer));
   // backCanvas = new Canvas(pixelWidth, pixelHeight);
   console.log('resize', pixelWidth, pixelHeight);
   backCanvas.name = 'backCanvas';
@@ -263,14 +240,7 @@ const drawFPS = (ctx) => {
   ctx.restore();
 };
 async function main() {
-  console.log(
-    'fullscreen',
-    fullscreen,
-    'showFPS',
-    showFPS,
-    'integerScaling',
-    integerScaling,
-  );
+  console.log('fullscreen', fullscreen, 'showFPS', showFPS, 'integerScaling', integerScaling);
   appWindow = sdl.video.createWindow({ resizable: true, fullscreen });
   console.log('appWindow CREATED', appWindow.pixelWidth, appWindow.pixelHeight);
   fpsFontSize = appWindow.pixelHeight / 25;
@@ -279,11 +249,7 @@ async function main() {
     setTimeout(() => {
       appWindow.setTitle('canvas game');
       appWindow.setFullscreen(fullscreen);
-      console.log(
-        'calling resize',
-        appWindow.pixelWidth,
-        appWindow.pixelHeight,
-      );
+      console.log('calling resize', appWindow.pixelWidth, appWindow.pixelHeight);
       resize();
       resolve();
     }, 100);
@@ -370,28 +336,17 @@ async function main() {
     backCtx.imageSmoothingEnabled = false;
     // console.log('gameWidth', gameWidth, 'gameHeight', gameHeight, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
 
-    if (
-      (windowWidth < gameWidth || windowHeight < gameHeight) &&
-      integerScaling
-    ) {
+    if ((windowWidth < gameWidth || windowHeight < gameHeight) && integerScaling) {
       console.log('NOT rednering to window', windowWidth, windowHeight);
       return;
     }
 
-    if (
-      !scaledGameWidth ||
-      prevGameWidth !== gameWidth ||
-      prevGameHeight !== gameHeight
-    ) {
+    if (!scaledGameWidth || prevGameWidth !== gameWidth || prevGameHeight !== gameHeight) {
       prevGameWidth = gameWidth;
       prevGameHeight = gameHeight;
       let xScale = 1;
       let yScale = 1;
-      if (
-        windowWidth >= gameWidth &&
-        windowHeight >= gameHeight &&
-        integerScaling
-      ) {
+      if (windowWidth >= gameWidth && windowHeight >= gameHeight && integerScaling) {
         // find max multiple of width and height that fits in window
         xScale = Math.floor(windowWidth / canvas.width);
         yScale = Math.floor(windowHeight / canvas.height);
@@ -407,12 +362,7 @@ async function main() {
       backCtx.strokeStyle = 'white';
       backCtx.lineWidth = 1;
       backCtx.imageSmoothingEnabled = false;
-      backCtx.strokeRect(
-        paintPosX,
-        paintPosY,
-        scaledGameWidth,
-        scaledGameHeight,
-      );
+      backCtx.strokeRect(paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
       console.log(
         'SCALING scaledGameWidth',
         scaledGameWidth,
@@ -431,10 +381,7 @@ async function main() {
 
     const startImageDrawTime = performance.now();
     // window same size as canvas is the fastest
-    if (
-      appWindow.pixelWidth === canvas.width &&
-      appWindow.pixelHeight === canvas.height
-    ) {
+    if (appWindow.pixelWidth === canvas.width && appWindow.pixelHeight === canvas.height) {
       if (showFPS) {
         drawFPS(ctx);
       }
@@ -444,44 +391,23 @@ async function main() {
         // imgData.data = canvas.data();
         // backCtx.putImageData(imgData, paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
         backCtx.clearRect(0, 0, backCanvas.width, backCanvas.height);
-        backCtx.drawImage(
-          canvas,
-          paintPosX,
-          paintPosY,
-          scaledGameWidth,
-          scaledGameHeight,
-        );
+        backCtx.drawImage(canvas, paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
         drawFPS(backCtx);
       } else {
-        backCtx.drawImage(
-          canvas,
-          paintPosX,
-          paintPosY,
-          scaledGameWidth,
-          scaledGameHeight,
-        );
+        backCtx.drawImage(canvas, paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
       }
     }
     imageDrawTime += performance.now() - startImageDrawTime;
 
     let buffer;
-    if (
-      appWindow.pixelWidth === canvas.width &&
-      appWindow.pixelHeight === canvas.height
-    ) {
+    if (appWindow.pixelWidth === canvas.width && appWindow.pixelHeight === canvas.height) {
       buffer = Buffer.from(canvas.data().buffer);
     } else {
       buffer = Buffer.from(backCanvas.data().buffer);
     }
 
     const startWindowRenderTime = performance.now();
-    await appWindow.render(
-      backCanvas.width,
-      backCanvas.height,
-      stride,
-      'rgba32',
-      buffer,
-    );
+    await appWindow.render(backCanvas.width, backCanvas.height, stride, 'rgba32', buffer);
     windowRenderTime += performance.now() - startWindowRenderTime;
   }
 
