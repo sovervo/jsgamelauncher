@@ -1,28 +1,34 @@
-import sdl from '@kmamal/sdl';
-import path from 'path';
-import Module from 'module';
-import fs from 'fs';
-import nrsc, { ImageData } from '@napi-rs/canvas';
-import Worker from 'web-worker';
-import getOptions from './options.js';
-import { initGamepads } from './gamepads.js';
-import { createCanvas, OffscreenCanvas } from './canvas.js';
-import { createImageClass, createLoadImage } from './image.js';
-import createLocalStorage from './localstorage.js';
-import initializeEvents from './events.js';
-import { AudioContext, AudioDestinationNode, OscillatorNode, GainNode, AudioBuffer } from 'webaudio-node';
-import createFetch from './fetch.js';
-import createXMLHttpRequest from './xhr.js';
-import { createObjectURL, revokeObjectURL, fetchBlobFromUrl } from './blob.js';
-import { Audio } from './audio.js';
-import { Video } from './video.js';
+import sdl from "@kmamal/sdl";
+import path from "path";
+import Module from "module";
+import fs from "fs";
+import nrsc, { ImageData } from "@napi-rs/canvas";
+import Worker from "web-worker";
+import getOptions from "./options.js";
+import { initGamepads } from "./gamepads.js";
+import { createCanvas, OffscreenCanvas } from "./canvas.js";
+import { createImageClass, createLoadImage } from "./image.js";
+import createLocalStorage from "./localstorage.js";
+import initializeEvents from "./events.js";
+import {
+  AudioContext,
+  AudioDestinationNode,
+  OscillatorNode,
+  GainNode,
+  AudioBuffer,
+} from "webaudio-node";
+import createFetch from "./fetch.js";
+import createXMLHttpRequest from "./xhr.js";
+import { createObjectURL, revokeObjectURL, fetchBlobFromUrl } from "./blob.js";
+import { Audio } from "./audio.js";
+import { Video } from "./video.js";
 
-console.log('ARGS', process.argv);
-console.log('ENV', JSON.stringify(process.env));
+console.log("ARGS", process.argv);
+console.log("ENV", JSON.stringify(process.env));
 
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  if (err.code === 'EPIPE') {
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  if (err.code === "EPIPE") {
     // console.log('EPIPE');
     // process.exit(0);
     return;
@@ -39,18 +45,18 @@ console.log = (...args) => {
   } catch (e) {
     // do nothing
   }
-}
+};
 console.error = (...args) => {
   try {
     internalError(...args);
   } catch (e) {
     // do nothing
   }
-}
+};
 
 globalThis.global = globalThis;
 globalThis.self = globalThis;
-console.log('LAUNCHING....');
+console.log("LAUNCHING....");
 // console.log('@napi-rs/canvas capabilities', Object.keys(nrsc));
 // console.log('@kmamal/sdl capabilities', Object.keys(sdl));
 let canvas;
@@ -73,17 +79,17 @@ const document = {
     return canvas;
   },
   createElement: (name) => {
-    console.log('DCOUMENT.createElement', name);
-    if (name === 'canvas') {
+    console.log("DCOUMENT.createElement", name);
+    if (name === "canvas") {
       return createCanvas(300, 150);
     }
-    if (name === 'image' && globalThis.Image) {
+    if (name === "image" && globalThis.Image) {
       return new globalThis.Image();
     }
-    if (name === 'video' && globalThis.Video) {
+    if (name === "video" && globalThis.Video) {
       return new globalThis.Video();
     }
-    if (name === 'audio' && globalThis.Audio) {
+    if (name === "audio" && globalThis.Audio) {
       return new globalThis.Audio();
     }
     return {};
@@ -102,9 +108,9 @@ const document = {
     },
   },
   documentElement: {},
-  readyState: 'complete',
+  readyState: "complete",
   currentScript: {
-    src: '',
+    src: "",
   },
 };
 globalThis.document = document;
@@ -128,13 +134,13 @@ function requestAnimationFrame(callback) {
     callback,
   };
   return rafCallbackId;
-};
+}
 
 function cancelAnimationFrame(id) {
   if (currentRafCallback?.id === id) {
     currentRafCallback = null;
   }
-};
+}
 
 globalThis.requestAnimationFrame = requestAnimationFrame;
 globalThis.cancelAnimationFrame = cancelAnimationFrame;
@@ -142,19 +148,19 @@ globalThis.cancelAnimationFrame = cancelAnimationFrame;
 
 const options = getOptions();
 
-console.log('\n----------OPTIONS----------:\n', options, '\n');
+console.log("\n----------OPTIONS----------:\n", options, "\n");
 
 const romFile = options.Rom;
 const romDir = path.dirname(romFile);
 let gameFile;
 const tryOrder = [
-  ['main.js'],
-  ['src', 'main.js'],
-  ['index.js'],
-  ['src', 'index.js'],
-  ['game.js'],
-  ['src', 'game.js'],
-]
+  ["main.js"],
+  ["src", "main.js"],
+  ["index.js"],
+  ["src", "index.js"],
+  ["game.js"],
+  ["src", "game.js"],
+];
 for (const order of tryOrder) {
   const tryGameFile = path.join(romDir, ...order);
   if (fs.existsSync(tryGameFile)) {
@@ -163,25 +169,24 @@ for (const order of tryOrder) {
   }
 }
 if (!gameFile) {
-  console.error('game.js file not found');
+  console.error("game.js file not found");
   process.exit(1);
 }
 
-console.log('gameFile', gameFile);
+console.log("gameFile", gameFile);
 const romName = path.basename(romDir);
-console.log('gameFile', gameFile, 'romDir', romDir, 'romName', romName);
+console.log("gameFile", gameFile, "romDir", romDir, "romName", romName);
 
-if (fs.existsSync(path.join(romDir, 'node_modules'))) {
-  Module.globalPaths.push(path.join(romDir, 'node_modules'));
+if (fs.existsSync(path.join(romDir, "node_modules"))) {
+  Module.globalPaths.push(path.join(romDir, "node_modules"));
   // console.log(Module.globalPaths);
 }
-console.log('creating rom specific globals', romDir);
+console.log("creating rom specific globals", romDir);
 globalThis.loadImage = createLoadImage(romDir);
 globalThis.Image = createImageClass(romDir);
 globalThis.fetch = createFetch(romDir);
 globalThis.XMLHttpRequest = createXMLHttpRequest(romDir);
 globalThis.localStorage = await createLocalStorage(romName);
-
 
 let gameWidth = 640; // default width
 let gameHeight = 480; // default height
@@ -204,9 +209,9 @@ let fpsFontSize = 0;
 let setCanvasSizeToWindow = false;
 let canvasAutoResize = false;
 let canCanvasAutoResize = true;
-let frameCount = 0;               // Frame counter
-let fps = 0;                      // Current FPS value
-let fpsInterval = 1000;           // Update FPS every second
+let frameCount = 0; // Frame counter
+let fps = 0; // Current FPS value
+let fpsInterval = 1000; // Update FPS every second
 let lastTime; // Track the last frame's time
 
 const resize = () => {
@@ -221,48 +226,69 @@ const resize = () => {
   }
   globalThis.innerWidth = pixelWidth;
   globalThis.innerHeight = pixelHeight;
-  const backCtx = backCanvas.getContext('2d');
+  const backCtx = backCanvas.getContext("2d");
   backCtx.imageSmoothingEnabled = false;
-  backCtx.fillStyle = 'white';
+  backCtx.fillStyle = "white";
   const fontSize = pixelWidth / 25;
   backCtx.font = `${fontSize}px Arial`;
-  backCtx.fillText('Loading...', pixelWidth / 2 - fontSize * 5, pixelHeight / 2);
-  appWindow.render(pixelWidth, pixelHeight, stride, 'rgba32', Buffer.from(backCanvas.data().buffer));
+  backCtx.fillText(
+    "Loading...",
+    pixelWidth / 2 - fontSize * 5,
+    pixelHeight / 2
+  );
+  appWindow.render(
+    pixelWidth,
+    pixelHeight,
+    stride,
+    "rgba32",
+    Buffer.from(backCanvas.data().buffer)
+  );
   // backCanvas = new Canvas(pixelWidth, pixelHeight);
-  console.log('resize', pixelWidth, pixelHeight);
-  backCanvas.name = 'backCanvas';
+  console.log("resize", pixelWidth, pixelHeight);
+  backCanvas.name = "backCanvas";
   scaledGameWidth = null;
   scaledGameHeight = null;
   fpsFontSize = pixelHeight / 25;
-}
+};
 
 const drawFPS = (ctx) => {
   const size = ctx.canvas.width / 30;
   ctx.save();
-  ctx.fillStyle = 'yellow';
-  ctx.strokeStyle = 'black';
+  ctx.fillStyle = "yellow";
+  ctx.strokeStyle = "black";
   ctx.lineWidth = 1;
   ctx.font = `bold ${size}px Arial`;
-  ctx.fillText('FPS: ' + fps, size / 2, size * 1.5);
-  ctx.strokeText('FPS: ' + fps, size / 2, size * 1.5);
+  ctx.fillText("FPS: " + fps, size / 2, size * 1.5);
+  ctx.strokeText("FPS: " + fps, size / 2, size * 1.5);
   ctx.restore();
 };
 async function main() {
-  console.log('fullscreen', fullscreen, 'showFPS', showFPS, 'integerScaling', integerScaling);
+  console.log(
+    "fullscreen",
+    fullscreen,
+    "showFPS",
+    showFPS,
+    "integerScaling",
+    integerScaling
+  );
   appWindow = sdl.video.createWindow({ resizable: true, fullscreen });
-  console.log('appWindow CREATED', appWindow.pixelWidth, appWindow.pixelHeight);
+  console.log("appWindow CREATED", appWindow.pixelWidth, appWindow.pixelHeight);
   fpsFontSize = appWindow.pixelHeight / 25;
 
   await new Promise((resolve) => {
     setTimeout(() => {
-      appWindow.setTitle('canvas game');
+      appWindow.setTitle("canvas game");
       appWindow.setFullscreen(fullscreen);
-      console.log('calling resize', appWindow.pixelWidth, appWindow.pixelHeight);
+      console.log(
+        "calling resize",
+        appWindow.pixelWidth,
+        appWindow.pixelHeight
+      );
       resize();
       resolve();
     }, 100);
   });
-  console.log('appWindow RESIZED', appWindow.pixelWidth, appWindow.pixelHeight);
+  console.log("appWindow RESIZED", appWindow.pixelWidth, appWindow.pixelHeight);
   const eventHandlers = initializeEvents(appWindow);
   callResizeEvents = eventHandlers.callResizeEvents;
   if (setCanvasSizeToWindow) {
@@ -274,15 +300,15 @@ async function main() {
   gameHeight = canvas.height;
   globalThis.innerWidth = appWindow.pixelWidth;
   globalThis.innerHeight = appWindow.pixelHeight;
-  console.log('canvas', canvas.width, canvas.height);
+  console.log("canvas", canvas.width, canvas.height);
   if (!canvas.addEventListener) {
     canvas.addEventListener = (a) => {
-      console.log('canvas.addEventListener', a);
+      console.log("canvas.addEventListener", a);
     };
   }
   if (!canvas.removeEventListener) {
     canvas.removeEventListener = (a) => {
-      console.log('canvas.removeEventListener', a);
+      console.log("canvas.removeEventListener", a);
     };
   }
   if (!canvas.getBoundingClientRect) {
@@ -295,11 +321,29 @@ async function main() {
       };
     };
   }
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = false;
-  canvas.name = 'game canvas';
-  console.log('Pre-import gameWidth', canvas.width , 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
-  await import(gameFile);
+  canvas.name = "game canvas";
+  console.log(
+    "Pre-import gameWidth",
+    canvas.width,
+    "gameHeight",
+    canvas.height,
+    "prevGameWidth",
+    prevGameWidth,
+    "prevGameHeight",
+    prevGameHeight
+  );
+
+  await import("file://" + gameFile);
+
+  // if (os.platform() === 'win32') {
+  //   await import("file://" + gameFile);
+  // } else {
+  //   await import(gameFile);
+  // }
+  // await import(gameFile);
+
   resize();
   // console.log('Post-import gameWidth', canvas.width, 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
   eventHandlers.callLoadingEvents();
@@ -311,57 +355,87 @@ async function main() {
   let callbackTime = 0;
   let windowRenderTime = 0;
 
-
   lastTime = performance.now(); // Track the last frame's time
 
   async function launcherDraw() {
     gameWidth = canvas.width;
     gameHeight = canvas.height;
-  
+
     const { pixelWidth: windowWidth, pixelHeight: windowHeight } = appWindow;
     if (!backCanvas) {
       stride = windowWidth * 4;
-      console.log('windowWidth', windowWidth, 'windowWidth', windowWidth);
+      console.log("windowWidth", windowWidth, "windowWidth", windowWidth);
       backCanvas = createCanvas(windowWidth, windowWidth);
     }
-    const backCtx = backCanvas.getContext('2d');
+    const backCtx = backCanvas.getContext("2d");
     backCtx.imageSmoothingEnabled = false;
     // console.log('gameWidth', gameWidth, 'gameHeight', gameHeight, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
-    
-    if (((windowWidth < gameWidth) || (windowHeight < gameHeight)) && integerScaling) {
-      console.log('NOT rednering to window', windowWidth, windowHeight);
+
+    if (
+      (windowWidth < gameWidth || windowHeight < gameHeight) &&
+      integerScaling
+    ) {
+      console.log("NOT rednering to window", windowWidth, windowHeight);
       return;
     }
 
-    if (!scaledGameWidth || (prevGameWidth !== gameWidth) || (prevGameHeight !== gameHeight)) {
+    if (
+      !scaledGameWidth ||
+      prevGameWidth !== gameWidth ||
+      prevGameHeight !== gameHeight
+    ) {
       prevGameWidth = gameWidth;
       prevGameHeight = gameHeight;
       let xScale = 1;
       let yScale = 1;
-      if ((windowWidth >= gameWidth ) && (windowHeight >= gameHeight) && integerScaling) {
+      if (
+        windowWidth >= gameWidth &&
+        windowHeight >= gameHeight &&
+        integerScaling
+      ) {
         // find max multiple of width and height that fits in window
         xScale = Math.floor(windowWidth / canvas.width);
         yScale = Math.floor(windowHeight / canvas.height);
       } else {
         xScale = windowWidth / canvas.width;
         yScale = windowHeight / canvas.height;
-        
       }
       gameScale = Math.min(xScale, yScale);
       scaledGameWidth = gameWidth * gameScale;
       scaledGameHeight = gameHeight * gameScale;
       paintPosX = (windowWidth - scaledGameWidth) / 2;
       paintPosY = (windowHeight - scaledGameHeight) / 2;
-      backCtx.strokeStyle = 'white';
+      backCtx.strokeStyle = "white";
       backCtx.lineWidth = 1;
       backCtx.imageSmoothingEnabled = false;
-      backCtx.strokeRect(paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
-      console.log('SCALING scaledGameWidth', scaledGameWidth, 'scaledGameHeight', scaledGameHeight, 'paintPosX', paintPosX, 'paintPosY', paintPosY, 'gameWidth', gameWidth, 'gameHeight', gameHeight);
+      backCtx.strokeRect(
+        paintPosX,
+        paintPosY,
+        scaledGameWidth,
+        scaledGameHeight
+      );
+      console.log(
+        "SCALING scaledGameWidth",
+        scaledGameWidth,
+        "scaledGameHeight",
+        scaledGameHeight,
+        "paintPosX",
+        paintPosX,
+        "paintPosY",
+        paintPosY,
+        "gameWidth",
+        gameWidth,
+        "gameHeight",
+        gameHeight
+      );
     }
-    
+
     const startImageDrawTime = performance.now();
     // window same size as canvas is the fastest
-    if ((appWindow.pixelWidth === canvas.width) && (appWindow.pixelHeight === canvas.height)) {
+    if (
+      appWindow.pixelWidth === canvas.width &&
+      appWindow.pixelHeight === canvas.height
+    ) {
       if (showFPS) {
         drawFPS(ctx);
       }
@@ -371,48 +445,68 @@ async function main() {
         // imgData.data = canvas.data();
         // backCtx.putImageData(imgData, paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
         backCtx.clearRect(0, 0, backCanvas.width, backCanvas.height);
-        backCtx.drawImage(canvas, paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
+        backCtx.drawImage(
+          canvas,
+          paintPosX,
+          paintPosY,
+          scaledGameWidth,
+          scaledGameHeight
+        );
         drawFPS(backCtx);
       } else {
-        backCtx.drawImage(canvas, paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
+        backCtx.drawImage(
+          canvas,
+          paintPosX,
+          paintPosY,
+          scaledGameWidth,
+          scaledGameHeight
+        );
       }
     }
-    imageDrawTime+= (performance.now() - startImageDrawTime);
-    
-    
+    imageDrawTime += performance.now() - startImageDrawTime;
+
     let buffer;
-    if (appWindow.pixelWidth === canvas.width && appWindow.pixelHeight === canvas.height) {
+    if (
+      appWindow.pixelWidth === canvas.width &&
+      appWindow.pixelHeight === canvas.height
+    ) {
       buffer = Buffer.from(canvas.data().buffer);
     } else {
       buffer = Buffer.from(backCanvas.data().buffer);
     }
-    
+
     const startWindowRenderTime = performance.now();
-    await appWindow.render(backCanvas.width, backCanvas.height, stride, 'rgba32', buffer);
-    windowRenderTime+= (performance.now() - startWindowRenderTime);
+    await appWindow.render(
+      backCanvas.width,
+      backCanvas.height,
+      stride,
+      "rgba32",
+      buffer
+    );
+    windowRenderTime += performance.now() - startWindowRenderTime;
   }
 
-  appWindow.on('close', () => {
-    console.log('window closed');
+  appWindow.on("close", () => {
+    console.log("window closed");
     process.exit(0);
   });
 
-  appWindow.on('resize', () => {
+  appWindow.on("resize", () => {
     // const error = new Error('resize called');
     // console.log(error.stack); // Print the stack trace
     resize();
   });
-  
+
   function launcherLoop() {
     callCount++;
-    const currentTime = performance.now();       // Get current time
-    frameCount++;                                // Increment frame count
+    const currentTime = performance.now(); // Get current time
+    frameCount++; // Increment frame count
 
     // Check if one second has passed
     if (currentTime - lastTime >= fpsInterval) {
-      fps = frameCount;                          // Set FPS to the frame count
-      frameCount = 0;                            // Reset the frame counter
-      lastTime = currentTime;                    // Reset the timer
+      fps = frameCount; // Set FPS to the frame count
+      frameCount = 0; // Reset the frame counter
+      lastTime = currentTime; // Reset the timer
     }
     const [gp] = globalThis.navigator.getGamepads();
     if (gp) {
@@ -420,7 +514,7 @@ async function main() {
       // handle hotkey input
       if (btns[16].pressed) {
         if (btns[9].pressed) {
-          console.log('EXITING');
+          console.log("EXITING");
           process.exit(0);
         }
 
@@ -435,7 +529,7 @@ async function main() {
 
         if (btns[13].pressed && canToggleFPS) {
           showFPS = !showFPS;
-          console.log('showFPS', showFPS);
+          console.log("showFPS", showFPS);
           canToggleFPS = false;
           resize();
         } else if (!btns[13].pressed) {
@@ -444,7 +538,7 @@ async function main() {
 
         if (btns[14].pressed && canToggleIntegerScaling) {
           integerScaling = !integerScaling;
-          console.log('integerScaling', integerScaling);
+          console.log("integerScaling", integerScaling);
           canToggleIntegerScaling = false;
           resize();
         } else if (!btns[14].pressed) {
@@ -459,12 +553,12 @@ async function main() {
       currentRafCallback = null;
       thisCallback.callback(performance.now());
     }
-    callbackTime+= (performance.now() - callbackStartTime);
+    callbackTime += performance.now() - callbackStartTime;
 
     launcherDraw();
     setImmediate(launcherLoop);
   }
-  
+
   await initGamepads(options.Addconcfg);
   launcherLoop();
 
@@ -472,14 +566,26 @@ async function main() {
   setInterval(() => {
     // somtimes console.log throws an error ¯\_(ツ)_/¯
     try {
-      console.log(fps, 'FPS',
-        'window.WxH', backCanvas.width, backCanvas.height,
-        'canvas.WxH', canvas.width, canvas.height,
-        'drawImage', Number(imageDrawTime / callCount).toFixed(5),
-        'game stretched', scaledGameWidth, scaledGameHeight,
-        'game.callback', Number(callbackTime / callCount).toFixed(5),
-        'game.scale', gameScale,
-        'window.render', Number(windowRenderTime / callCount).toFixed(5),
+      console.log(
+        fps,
+        "FPS",
+        "window.WxH",
+        backCanvas.width,
+        backCanvas.height,
+        "canvas.WxH",
+        canvas.width,
+        canvas.height,
+        "drawImage",
+        Number(imageDrawTime / callCount).toFixed(5),
+        "game stretched",
+        scaledGameWidth,
+        scaledGameHeight,
+        "game.callback",
+        Number(callbackTime / callCount).toFixed(5),
+        "game.scale",
+        gameScale,
+        "window.render",
+        Number(windowRenderTime / callCount).toFixed(5)
       );
     } catch (e) {
       console.error(e);
