@@ -1,4 +1,5 @@
 {
+  "removeParens": false,
   "semi": true,
   "singleQuote": true,
   "printWidth": 140

@@ -301,14 +301,8 @@ async function main() {
     prevGameHeight,
   );
 
+  //added file:// to fix issue with windows, tested on windows 10, macos, and linux/knulli
   await import('file://' + gameFile);
-  // if (os.platform() === 'win32') {
-  //   await import("file://" + gameFile);
-  // } else {
-  //   await import(gameFile);
-  // }
-  // await import(gameFile);
-
   resize();
   // console.log('Post-import gameWidth', canvas.width, 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
   eventHandlers.callLoadingEvents();
