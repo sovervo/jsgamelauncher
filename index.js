@@ -39,14 +39,14 @@ console.log = (...args) => {
   } catch (e) {
     // do nothing
   }
-};
+}
 console.error = (...args) => {
   try {
     internalError(...args);
   } catch (e) {
     // do nothing
   }
-};
+}
 
 globalThis.global = globalThis;
 globalThis.self = globalThis;
@@ -128,13 +128,13 @@ function requestAnimationFrame(callback) {
     callback,
   };
   return rafCallbackId;
-}
+};
 
 function cancelAnimationFrame(id) {
   if (currentRafCallback?.id === id) {
     currentRafCallback = null;
   }
-}
+};
 
 globalThis.requestAnimationFrame = requestAnimationFrame;
 globalThis.cancelAnimationFrame = cancelAnimationFrame;
@@ -147,7 +147,14 @@ console.log('\n----------OPTIONS----------:\n', options, '\n');
 const romFile = options.Rom;
 const romDir = path.dirname(romFile);
 let gameFile;
-const tryOrder = [['main.js'], ['src', 'main.js'], ['index.js'], ['src', 'index.js'], ['game.js'], ['src', 'game.js']];
+const tryOrder = [
+  ['main.js'],
+  ['src', 'main.js'],
+  ['index.js'],
+  ['src', 'index.js'],
+  ['game.js'],
+  ['src', 'game.js'],
+]
 for (const order of tryOrder) {
   const tryGameFile = path.join(romDir, ...order);
   if (fs.existsSync(tryGameFile)) {
@@ -175,6 +182,7 @@ globalThis.fetch = createFetch(romDir);
 globalThis.XMLHttpRequest = createXMLHttpRequest(romDir);
 globalThis.localStorage = await createLocalStorage(romName);
 
+
 let gameWidth = 640; // default width
 let gameHeight = 480; // default height
 let prevGameWidth = gameWidth;
@@ -196,9 +204,9 @@ let fpsFontSize = 0;
 let setCanvasSizeToWindow = false;
 let canvasAutoResize = false;
 let canCanvasAutoResize = true;
-let frameCount = 0; // Frame counter
-let fps = 0; // Current FPS value
-let fpsInterval = 1000; // Update FPS every second
+let frameCount = 0;               // Frame counter
+let fps = 0;                      // Current FPS value
+let fpsInterval = 1000;           // Update FPS every second
 let lastTime; // Track the last frame's time
 
 const resize = () => {
@@ -226,7 +234,7 @@ const resize = () => {
   scaledGameWidth = null;
   scaledGameHeight = null;
   fpsFontSize = pixelHeight / 25;
-};
+}
 
 const drawFPS = (ctx) => {
   const size = ctx.canvas.width / 30;
@@ -290,8 +298,7 @@ async function main() {
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   canvas.name = 'game canvas';
-  console.log('Pre-import gameWidth', canvas.width, 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
-
+  console.log('Pre-import gameWidth', canvas.width , 'gameHeight', canvas.height, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
   //added file:// to fix issue with windows, tested on windows 10, macos, and linux/knulli
   await import('file://' + gameFile);
   resize();
@@ -305,12 +312,13 @@ async function main() {
   let callbackTime = 0;
   let windowRenderTime = 0;
 
+
   lastTime = performance.now(); // Track the last frame's time
 
   async function launcherDraw() {
     gameWidth = canvas.width;
     gameHeight = canvas.height;
-
+  
     const { pixelWidth: windowWidth, pixelHeight: windowHeight } = appWindow;
     if (!backCanvas) {
       stride = windowWidth * 4;
@@ -320,24 +328,25 @@ async function main() {
     const backCtx = backCanvas.getContext('2d');
     backCtx.imageSmoothingEnabled = false;
     // console.log('gameWidth', gameWidth, 'gameHeight', gameHeight, 'prevGameWidth', prevGameWidth, 'prevGameHeight', prevGameHeight);
-
-    if ((windowWidth < gameWidth || windowHeight < gameHeight) && integerScaling) {
+    
+    if (((windowWidth < gameWidth) || (windowHeight < gameHeight)) && integerScaling) {
       console.log('NOT rednering to window', windowWidth, windowHeight);
       return;
     }
 
-    if (!scaledGameWidth || prevGameWidth !== gameWidth || prevGameHeight !== gameHeight) {
+    if (!scaledGameWidth || (prevGameWidth !== gameWidth) || (prevGameHeight !== gameHeight)) {
       prevGameWidth = gameWidth;
       prevGameHeight = gameHeight;
       let xScale = 1;
       let yScale = 1;
-      if (windowWidth >= gameWidth && windowHeight >= gameHeight && integerScaling) {
+      if ((windowWidth >= gameWidth ) && (windowHeight >= gameHeight) && integerScaling) {
         // find max multiple of width and height that fits in window
         xScale = Math.floor(windowWidth / canvas.width);
         yScale = Math.floor(windowHeight / canvas.height);
       } else {
         xScale = windowWidth / canvas.width;
         yScale = windowHeight / canvas.height;
+        
       }
       gameScale = Math.min(xScale, yScale);
       scaledGameWidth = gameWidth * gameScale;
@@ -348,25 +357,12 @@ async function main() {
       backCtx.lineWidth = 1;
       backCtx.imageSmoothingEnabled = false;
       backCtx.strokeRect(paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
-      console.log(
-        'SCALING scaledGameWidth',
-        scaledGameWidth,
-        'scaledGameHeight',
-        scaledGameHeight,
-        'paintPosX',
-        paintPosX,
-        'paintPosY',
-        paintPosY,
-        'gameWidth',
-        gameWidth,
-        'gameHeight',
-        gameHeight,
-      );
+      console.log('SCALING scaledGameWidth', scaledGameWidth, 'scaledGameHeight', scaledGameHeight, 'paintPosX', paintPosX, 'paintPosY', paintPosY, 'gameWidth', gameWidth, 'gameHeight', gameHeight);
     }
-
+    
     const startImageDrawTime = performance.now();
     // window same size as canvas is the fastest
-    if (appWindow.pixelWidth === canvas.width && appWindow.pixelHeight === canvas.height) {
+    if ((appWindow.pixelWidth === canvas.width) && (appWindow.pixelHeight === canvas.height)) {
       if (showFPS) {
         drawFPS(ctx);
       }
@@ -382,18 +378,19 @@ async function main() {
         backCtx.drawImage(canvas, paintPosX, paintPosY, scaledGameWidth, scaledGameHeight);
       }
     }
-    imageDrawTime += performance.now() - startImageDrawTime;
-
+    imageDrawTime+= (performance.now() - startImageDrawTime);
+    
+    
     let buffer;
     if (appWindow.pixelWidth === canvas.width && appWindow.pixelHeight === canvas.height) {
       buffer = Buffer.from(canvas.data().buffer);
     } else {
       buffer = Buffer.from(backCanvas.data().buffer);
     }
-
+    
     const startWindowRenderTime = performance.now();
     await appWindow.render(backCanvas.width, backCanvas.height, stride, 'rgba32', buffer);
-    windowRenderTime += performance.now() - startWindowRenderTime;
+    windowRenderTime+= (performance.now() - startWindowRenderTime);
   }
 
   appWindow.on('close', () => {
@@ -406,17 +403,17 @@ async function main() {
     // console.log(error.stack); // Print the stack trace
     resize();
   });
-
+  
   function launcherLoop() {
     callCount++;
-    const currentTime = performance.now(); // Get current time
-    frameCount++; // Increment frame count
+    const currentTime = performance.now();       // Get current time
+    frameCount++;                                // Increment frame count
 
     // Check if one second has passed
     if (currentTime - lastTime >= fpsInterval) {
-      fps = frameCount; // Set FPS to the frame count
-      frameCount = 0; // Reset the frame counter
-      lastTime = currentTime; // Reset the timer
+      fps = frameCount;                          // Set FPS to the frame count
+      frameCount = 0;                            // Reset the frame counter
+      lastTime = currentTime;                    // Reset the timer
     }
     const [gp] = globalThis.navigator.getGamepads();
     if (gp) {
@@ -463,12 +460,12 @@ async function main() {
       currentRafCallback = null;
       thisCallback.callback(performance.now());
     }
-    callbackTime += performance.now() - callbackStartTime;
+    callbackTime+= (performance.now() - callbackStartTime);
 
     launcherDraw();
     setImmediate(launcherLoop);
   }
-
+  
   await initGamepads(options.Addconcfg);
   launcherLoop();
 
@@ -476,26 +473,14 @@ async function main() {
   setInterval(() => {
     // somtimes console.log throws an error ¯\_(ツ)_/¯
     try {
-      console.log(
-        fps,
-        'FPS',
-        'window.WxH',
-        backCanvas.width,
-        backCanvas.height,
-        'canvas.WxH',
-        canvas.width,
-        canvas.height,
-        'drawImage',
-        Number(imageDrawTime / callCount).toFixed(5),
-        'game stretched',
-        scaledGameWidth,
-        scaledGameHeight,
-        'game.callback',
-        Number(callbackTime / callCount).toFixed(5),
-        'game.scale',
-        gameScale,
-        'window.render',
-        Number(windowRenderTime / callCount).toFixed(5),
+      console.log(fps, 'FPS',
+        'window.WxH', backCanvas.width, backCanvas.height,
+        'canvas.WxH', canvas.width, canvas.height,
+        'drawImage', Number(imageDrawTime / callCount).toFixed(5),
+        'game stretched', scaledGameWidth, scaledGameHeight,
+        'game.callback', Number(callbackTime / callCount).toFixed(5),
+        'game.scale', gameScale,
+        'window.render', Number(windowRenderTime / callCount).toFixed(5),
       );
     } catch (e) {
       console.error(e);
