@@ -16,6 +16,7 @@ import createXMLHttpRequest from './xhr.js';
 import { createObjectURL, revokeObjectURL, fetchBlobFromUrl } from './blob.js';
 import { Audio } from './audio.js';
 import { Video } from './video.js';
+import initializeFontFace from './fontface.js';
 
 console.log('ARGS', process.argv);
 console.log('ENV', JSON.stringify(process.env));
@@ -106,6 +107,11 @@ const document = {
   currentScript: {
     src: '',
   },
+  fonts: {
+    add: (font) => {
+      console.log('document.fonts.add', font);
+    },
+  },
 };
 globalThis.document = document;
 globalThis.screen = {};
@@ -181,6 +187,7 @@ globalThis.Image = createImageClass(romDir);
 globalThis.fetch = createFetch(romDir);
 globalThis.XMLHttpRequest = createXMLHttpRequest(romDir);
 globalThis.localStorage = await createLocalStorage(romName);
+globalThis.FontFace = initializeFontFace(romDir);
 
 
 let gameWidth = 640; // default width
