@@ -14,9 +14,11 @@ Right now we have support for anything that runs [Knulli](https://knulli.org/) a
 - [x] WebAudio
 - [x] Keyboard events
 - [x] Gamepad API
+- [x] FontFace
 - [x] localStorage
 - [x] Web Assembly (WASM)
 - [x] Web Workers
+- [x] WebSockets
 - [ ] WebGL (Canvas 3D)
 
 ## JS Game Engine support
