@@ -66,6 +66,15 @@ For now we only support downloading the latest version of jsgamelaucher. At some
 - `curl -o- https://raw.githubusercontent.com/monteslu/jsgamelauncher/main/installers/install-rocknix.sh | bash`
 - That's it! Update the games list! Now you need a [game](https://github.com/monteslu/jsgames)! Just put that in `/roms/jsgames`. All you need is a game.js file as a starting point and a file called "&lt;game name&gt;.jsg". This could change!
 
+## Installing on [RetroBat](https://www.retrobat.org/)
+
+Installer script coming soon! The config files you need are in systems/retrobat and for now you can manually copy them to the correct location.
+
+ - jsgamelaucher folder => `C:\RetroBat\emulators\jsgamelauncher\`
+ - systems/retrobat/es_systems_jsgames.cfg => `C:\RetroBat\emulationstation\.emulationstation\`
+ - games => `C:\RetroBat\roms\jsgames\` [Sample Games Here](https://github.com/monteslu/jsgames)
+ - Then go to the EmulationStation Game Settings menu and choose "Update Gamelists"
+
 ## Installing on [muOS](https://muos.dev/)
 
 Coming soon! According to [joyrider3774](https://www.reddit.com/user/joyrider3774/) on this [thread](https://www.reddit.com/r/ANBERNIC/comments/1hsyv9n/comment/m5e2zsy/?context=3) all we need to do is install the GNU versions of ls and tar so that the curl command for installing nvm works.
