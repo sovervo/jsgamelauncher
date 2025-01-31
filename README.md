@@ -34,14 +34,20 @@ Other engines might work we just haven't tried them!
 
 [Sample games / Demos / Starter projects](https://github.com/monteslu/jsgames)
 
-## Running on a desktop OS
+## Running on a desktop OS (Mac, Linux, even Windows!)
 
+### Quickstart
+ - use node 22, change to a game directory
+ - Make a game.js file and a gamename.jsg file
+ - `npx rungame -rom ./gamename.jsg`
+
+### For contributors!
 - use at least node 22
-- clone this repo
-- cd to this directory
+- clone this repo, cd to this directory
 - npm install
 - `node index -rom /full/path/to/game.js` (clone sample game at https://github.com/monteslu/jsgames/tree/main/tuxgame or find other games at https://github.com/monteslu/jsgames)
 
+### Use the web
 You can also just run the game directly without using jsgamelauncher. The goal is to make web games that also work on a low end device but the web is a first class citizen. Check out the [Simple Vite](https://github.com/monteslu/jsgames/tree/main/simple-vite) example. Most examples will run on the web with `npm run dev`.
 
 ## Notes on Installing to a device
