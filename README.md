@@ -1,5 +1,5 @@
 # JavaScript Game Launcher
-Hello, I'm Aziza! This is a a seperate branch I have creathed to dive into this project from Halfstach Conferance 25' in Phenoix, AZ
+Hello, I'm Aziza! This is a a seperate branch I have creathed to dive into this project from Halfstack Conferance 25' in Phoenix, AZ
 
 <img src="./media/device-examples.jpg" height="300" align="right" alt="RG40XXV with Phaser demo">
 
