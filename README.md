@@ -1,12 +1,12 @@
 # JavaScript Game Launcher
 
-<img src="rg40xxv_demo.jpg" height="300" align="right" alt="RG40XXV with Phaser demo">
+<img src="./media/device-examples.jpg" height="300" align="right" alt="RG40XXV with Phaser demo">
 
 A compatibly layer for JavaScript games to run WITHOUT a browser or electron using standard web APIs.
 
 The goal is to run games on cheap ($50) retro devices (or even not so cheap ones as long as they run Linux . . . for now!) that will also run in browsers without any changes.
 
-Right now we have support for anything that runs [Knulli](https://knulli.org/) and has wifi (so Ambernic XX devices and TrimUI Smart Pro) as well as [Batocera](https://batocera.org/) (which can just be a old PC, a Raspberry Pi, or a ton of other handheld devices) or [ROCKNIX](https://rocknix.org/) which has a long list of supported devices.
+Right now we have support for anything that runs [Knulli](https://knulli.org/) and has wifi (so Ambernic XX devices and TrimUI Smart Pro) as well as [Batocera](https://batocera.org/) (which can just be a old PC, a Raspberry Pi, or a ton of other handheld devices) or [ROCKNIX](https://rocknix.org/) which has a long list of supported devices. We also have it running in [RetroBat](https://www.retrobat.org/) which is Batocera for Windows. It can be easily added to anything running Emulation Station using the instructions below but that's just the beginning.
 
 ### Browser APIs progress
 
@@ -14,11 +14,12 @@ Right now we have support for anything that runs [Knulli](https://knulli.org/) a
 - [x] WebAudio
 - [x] Keyboard events
 - [x] Gamepad API
-- [x] FontFace
-- [x] localStorage
+- [x] FontFace 
+- [x] LocalStorage
 - [x] Web Assembly (WASM)
 - [x] Web Workers
 - [x] WebSockets
+- [ ] Peer Connection
 - [ ] WebGL (Canvas 3D)
 
 ## JS Game Engine support
@@ -27,7 +28,7 @@ Right now we have support for anything that runs [Knulli](https://knulli.org/) a
 
 3D effects are not supported, but you can use the canvas API to draw 3D graphics.
 
-Others might work we just haven't tried them! Let us know if you try them!
+Other engines might work we just haven't tried them!
 
 ## Sample games
 
@@ -41,7 +42,7 @@ Others might work we just haven't tried them! Let us know if you try them!
 - npm install
 - `node index -rom /full/path/to/game.js` (clone sample game at https://github.com/monteslu/jsgames/tree/main/tuxgame or find other games at https://github.com/monteslu/jsgames)
 
-You can also just run the game directly without using jsgamelauncher. The goal is to make web games that also work on a low end device but the web is a first class citizen. Check out the [Simple Vite](https://github.com/monteslu/jsgames/tree/main/simple-vite) example.
+You can also just run the game directly without using jsgamelauncher. The goal is to make web games that also work on a low end device but the web is a first class citizen. Check out the [Simple Vite](https://github.com/monteslu/jsgames/tree/main/simple-vite) example. Most examples will run on the web with `npm run dev`.
 
 ## Notes on Installing to a device
 
