@@ -1,7 +1,7 @@
 {
   "name": "rungame",
   "description": "A simple non-browser game launcher for web games",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -20,7 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "@kmamal/sdl": "0.10.7",
-    "@napi-rs/canvas": "^0.1.65",
+    "@napi-rs/canvas": "0.1.65",
     "commander": "^12.1.0",
     "lowdb": "^7.0.1",
     "mime-types": "^2.1.35",

@@ -19,8 +19,6 @@ import { Audio } from './audio.js';
 import { Video } from './video.js';
 import initializeFontFace from './fontface.js';
 
-// console.log('ARGS', process.argv);
-// console.log('ENV', JSON.stringify(process.env));
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
@@ -68,10 +66,22 @@ globalThis.WebSocket = WebSocket;
 URL.createObjectURL = createObjectURL;
 URL.revokeObjectURL = revokeObjectURL;
 URL.fetchBlobFromUrl = fetchBlobFromUrl;
+// ts uses this class
+class MutationObserver {
+  constructor() {
+  }
+  observe() {
+  }
+}
+globalThis.MutationObserver = MutationObserver;
 const document = {
   getElementById: (id) => {
     // console.log('document.getElementById', id, canvas);
     return canvas;
+  },
+  querySelectorAll: (selector) => {
+    // console.log('document.querySelectorAll', selector);
+    return [];
   },
   createElement: (name) => {
     console.log('DCOUMENT.createElement', name);
@@ -183,8 +193,24 @@ for (const order of tryOrder) {
   }
 }
 if (!gameFile) {
-  console.error('game.js file not found');
-  process.exit(1);
+  // no game file found, try package.json
+  if (fs.existsSync(path.join(romDir, 'package.json'))) {
+    const packjson = JSON.parse(fs.readFileSync(path.join(romDir, 'package.json'), 'utf8'));
+    // console.log('packjson', packjson);
+    if (packjson.main) {
+      gameFile = path.join(romDir, packjson.main);
+      if (!fs.existsSync(gameFile)) {
+        console.error(gameFile, 'package.json main file not found');
+        process.exit(1);
+      } 
+    } else {
+      console.error('no main entry in package.json');
+      process.exit(1);
+    }
+  } else {
+    console.error('game file not found');
+    process.exit(1);
+  }
 }
 
 
@@ -375,11 +401,11 @@ async function main() {
         yScale = windowHeight / canvas.height;
         
       }
-      gameScale = Math.min(xScale, yScale);
-      scaledGameWidth = gameWidth * gameScale;
-      scaledGameHeight = gameHeight * gameScale;
-      paintPosX = (windowWidth - scaledGameWidth) / 2;
-      paintPosY = (windowHeight - scaledGameHeight) / 2;
+      gameScale = Math.round(Math.min(xScale, yScale));
+      scaledGameWidth = Math.round(gameWidth * gameScale);
+      scaledGameHeight = Math.round(gameHeight * gameScale);
+      paintPosX = Math.round((windowWidth - scaledGameWidth) / 2);
+      paintPosY = Math.round((windowHeight - scaledGameHeight) / 2);
       backCtx.strokeStyle = 'white';
       backCtx.lineWidth = 1;
       backCtx.imageSmoothingEnabled = false;
