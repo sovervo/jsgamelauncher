@@ -19,8 +19,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@kmamal/sdl": "0.10.7",
-    "@napi-rs/canvas": "0.1.65",
+    "@kmamal/sdl": "^0.10.12",
+    "@napi-rs/canvas": "^0.1.67",
     "commander": "^12.1.0",
     "lowdb": "^7.0.1",
     "mime-types": "^2.1.35",
