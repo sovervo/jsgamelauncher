@@ -1,12 +1,17 @@
 import { program, Option } from 'commander';
 
 export default function getOptions() {
+  let rom = null;
   program
     .allowUnknownOption()
     .name('js game launcher')
     .description('js game launcher')
     .version('1.0')
-    .addOption(new Option('-rom <string>', 'rom name (directory of javascript game)'))
+    .argument('[romfile]', 'rom file (directory of javascript game / rom file)')
+    .action((romfile) => {
+      rom = romfile;
+    })
+    .addOption(new Option('-rom <string>', 'rom file (directory of javascript game / rom file)'))
     .addOption(new Option('-fs, -fullscreen', 'fullscreen mode'))
     .addOption(new Option('-fps, -showfps', 'show fps'))
     .addOption(new Option('-aa, -antialiasing, -antialias', 'antialias mode'))
@@ -26,8 +31,9 @@ export default function getOptions() {
     .addOption(new Option('-p4guid <string>', 'player 4 controller guid'))
     .addOption(new Option('-addconcfg <string>', 'additional controller config (emulationstation es_input.cfg format)'))
     .addOption(new Option('-gameinfoxml <string>', 'game info xml (emulationstation format)'))
-    .parse();
+    .parse(process.argv);
 
   const options = program.opts();
+  options.Rom = options.Rom || rom;
   return options;
 };
