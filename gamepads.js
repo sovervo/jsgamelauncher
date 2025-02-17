@@ -28,9 +28,9 @@ function getControllerDef(device) {
   });
   // console.log('matchedAdditional? :', matchedAdditional);
   if (matchedAdditional?.length) {
-    // console.log('matchedAdditional yes', matchedAdditional);
-    // last (most recent) one on the list
-    return matchedAdditional[matchedAdditional.length - 1];
+    def = matchedAdditional[matchedAdditional.length - 1];
+    def.fromAdditional = true;
+    return def;
   }
 
   const matchedGuids = controllerList.filter((c) => c.guid === device.guid);
@@ -42,6 +42,7 @@ function getControllerDef(device) {
     if (matchedGuidAndName.length === 1) {
       return matchedGuidAndName[0];
     }
+    // multiple controllers with same guid and name, pick the longest input list
     if (matchedGuidAndName.length > 1) {
       def = matchedGuidAndName[0];
       for (const c of matchedGuidAndName) {
@@ -51,6 +52,7 @@ function getControllerDef(device) {
       }
       return def;
     }
+    // matchedGuids, but not name, pick the longest input list
     def = matchedGuids[0];
     for (const c of matchedGuids) {
       if (c.input.length > def.input.length) {
@@ -100,7 +102,7 @@ const esButtonMap = {
 
 function createJSMap(device) {
   const def = getControllerDef(device);
-  console.log('createJSMap def', def?.name, def?.guid);
+  console.log('createJSMap def', def?.name, def?.guid, def?.fromDB);
   if (!def) {
     return;
   }
@@ -121,6 +123,7 @@ function createJSMap(device) {
         id,
         name: i.name,
         value: parseInt(i.value, 10),
+        multiplier: parseInt(i.value, 10) * -1,
       });
     }
   });
@@ -130,22 +133,23 @@ function createJSMap(device) {
       const val = e.value;
       // gp.axes[e.axix] = e.value;
       const axesDefs = axes[e.axis];
+      // console.log('axesHandler', e.axis, val, axesDefs);
       if (!axesDefs) {
         return;
       }
       for (const a of axesDefs) {
         switch (a.name) {
           case 'joystick1left':
-            gp.axes[0] = val;
+            gp.axes[0] = val * a.multiplier;
             break;
           case 'joystick1up':
-            gp.axes[1] = val;
+            gp.axes[1] = val * a.multiplier;
             break;
           case 'joystick2left':
-            gp.axes[2] = val;
+            gp.axes[2] = val * a.multiplier;
             break;
           case 'joystick2up':
-            gp.axes[3] = val;
+            gp.axes[3] = val * a.multiplier;
             break;
           case 'l2':
             gp.axes[5] = val;
@@ -291,6 +295,7 @@ const sonyPS4JSMap = {
 
 
 export async function initGamepads(addtionalControllerListFile) {
+  globalThis._jsg = globalThis._jsg || {};
 
   const { controller, joystick } = sdl;
 
@@ -306,6 +311,8 @@ export async function initGamepads(addtionalControllerListFile) {
         _jsMap = xbox360JSMap;
       }
     }
+
+    // console.log('created Gamepad....', device.name, device.guid, _jsMap, 'type', _sdltype);
     
     return {
       id: device.name,
@@ -378,6 +385,7 @@ export async function initGamepads(addtionalControllerListFile) {
           }
         } else if (type === 'axisMotion') {
           if (stdGamepadMapping[e.axis] !== undefined) {
+            console.log('axisMotion', e.axis, 'stdGamepadMapping[e.axis]', stdGamepadMapping[e.axis]);
             gp.axes[stdGamepadMapping[e.axis]] = e.value;
           }
           if (e.axis === 'leftTrigger') {
@@ -404,10 +412,10 @@ export async function initGamepads(addtionalControllerListFile) {
       }
     });
     if (!exists) {
-      console.log('adding joystick', device.name, device.guid);
-      const gp = createGamepad(device, 'joystick');
+      // console.log('adding joystick', device.name, device.guid);
       console.log('opening joystick', device.name, device.guid);
       const instance = joystick.openDevice(device);
+      const gp = createGamepad(device, 'joystick');
       console.log('joystick instance opened');
       if (globalThis._jsg.debug) {
         const sdlJoystick = {
