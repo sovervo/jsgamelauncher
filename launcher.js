@@ -267,7 +267,6 @@ let fps = 0;                      // Current FPS value
 let fpsInterval = 1000;           // Update FPS every second
 let lastTime; // Track the last frame's time
 let windowRatio = 1;
-const ASPECT_RATIO_TOLERANCE = 0.20;
 let useBackCanvas = false;
 let aspectRatioDifference = 0;
 
@@ -277,9 +276,13 @@ const resize = () => {
   let backCanvasHeight = pixelHeight;
   windowRatio = pixelWidth / pixelHeight;
   backCanvas = createCanvas(backCanvasWidth, backCanvasHeight);
-  if (canvasAutoResize && canvas) {
-    canvas.width = pixelWidth;
-    canvas.height = pixelHeight;
+  if (canvas) {
+    const canvasRatio = canvas.width / canvas.height;
+    aspectRatioDifference = Math.abs(windowRatio - canvasRatio);
+    if (canvasAutoResize) {
+      canvas.width = pixelWidth;
+      canvas.height = pixelHeight;
+    }
   }
   globalThis.innerWidth = pixelWidth;
   globalThis.innerHeight = pixelHeight;
