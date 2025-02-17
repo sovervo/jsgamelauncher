@@ -385,7 +385,7 @@ export async function initGamepads(addtionalControllerListFile) {
           }
         } else if (type === 'axisMotion') {
           if (stdGamepadMapping[e.axis] !== undefined) {
-            console.log('axisMotion', e.axis, 'stdGamepadMapping[e.axis]', stdGamepadMapping[e.axis]);
+            // console.log('axisMotion', e.axis, 'stdGamepadMapping[e.axis]', stdGamepadMapping[e.axis]);
             gp.axes[stdGamepadMapping[e.axis]] = e.value;
           }
           if (e.axis === 'leftTrigger') {
