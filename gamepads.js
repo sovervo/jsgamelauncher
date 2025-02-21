@@ -339,10 +339,15 @@ export async function initGamepads(addtionalControllerListFile) {
       }
     });
     if (!exists) {
-      console.log('adding controller', device, joystick.devices.length);
-      const gp = createGamepad(device, 'controller');
       console.log('opening controller', device.name, device.guid);
-      const instance = controller.openDevice(device);
+      let instance;
+      try {
+        instance = controller.openDevice(device);
+      } catch (e) {
+        console.error('error opening controller', e);
+        return;
+      }
+      const gp = createGamepad(device, 'controller');
       console.log('controller instance opened');
       if (globalThis._jsg.debug) {
         const sdlController = {
@@ -414,7 +419,13 @@ export async function initGamepads(addtionalControllerListFile) {
     if (!exists) {
       // console.log('adding joystick', device.name, device.guid);
       console.log('opening joystick', device.name, device.guid);
-      const instance = joystick.openDevice(device);
+      let instance; 
+      try {
+        instance = joystick.openDevice(device);
+      } catch (e) {
+        console.error('error opening joystick', e);
+        return;
+      }
       const gp = createGamepad(device, 'joystick');
       console.log('joystick instance opened');
       if (globalThis._jsg.debug) {
