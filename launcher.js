@@ -101,6 +101,11 @@ const document = {
     if (name === 'audio' && globalThis.Audio) {
       return new globalThis.Audio();
     }
+    if (name === 'div') {
+      return {
+        style: {}
+      };
+    }
     return {};
   },
   hasFocus: () => {
