@@ -88,7 +88,7 @@ const document = {
     return [];
   },
   createElement: (name, ...args) => {
-    console.log('DCOUMENT.createElement', name, args);
+    console.log('DOCUMENT.createElement', name, args);
     if (name === 'canvas') {
       return createCanvas(300, 150);
     }
