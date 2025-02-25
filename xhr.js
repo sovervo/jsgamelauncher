@@ -51,7 +51,10 @@ export default function createXMLHttpRequest(gameDir) {
           this.statusText = 'OK';
           this._responseText = fileContent;
           this.responseType = 'text';
-          this.response = this.responseText;
+          this.response = fileContent.buffer.slice(
+            fileContent.byteOffset, 
+            fileContent.byteOffset + fileContent.byteLength
+          );
           this.readyState = 4;
           this.getAllResponseHeaders = () =>
             `Content-Type: ${mime.lookup(this.localFilePath) || 'application/octet-stream'}`;
