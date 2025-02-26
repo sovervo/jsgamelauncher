@@ -30,9 +30,11 @@ Right now we have support for anything that runs [Knulli](https://knulli.org/) a
 
 Other engines might work, we just haven't tried them!
 
-## Sample games
+## Adding games to the launcher
 
 [Sample games / Demos / Starter projects](https://github.com/monteslu/jsgames)
+
+[How to make a game](./docs/developing-games.md)
 
 ## Running on a desktop OS (Mac, Linux, even Windows!)
 
