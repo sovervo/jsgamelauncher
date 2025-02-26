@@ -18,7 +18,7 @@ To develop games that work seamlessly with jsgamelauncher, just develop your gam
 - [Debugging](#debugging)
 - [Examples](#examples)
 - [AI based quick start](#ai-based-quick-start)
-
+- [Running the game on a retro gaming device](#running-the-game-on-a-retro-gaming-device)
 
 ## Prerequisites
 
@@ -191,13 +191,15 @@ For example games and demos compatible with jsgamelauncher, check out the [jsgam
 - Play your new game!
 
 ## Running the game on a retro gaming device
-- Make sure you've followed the jsgamelauncher [installation instructions](https://github.com/monteslu/jsgamelauncher/blob/main/README.md#Installing).
+![Running on a retro gaming device](./images/running-on-retro-device.jpg)
+
+- Make sure you've followed the jsgamelauncher [installation instructions](https://github.com/monteslu/jsgamelauncher/blob/main/README.md#installing-on-knulli-or-batocera) for your device.
 - Make sure you've named your game folder something that isn't already a game on the device.
 - Update the `package.json` with your game name.
 - Make sure you have a &lt;my-game-name&gt;.jsg file in the root of your game folder.
 - Copy the game folder to the `roms/jsgames` folder on your device.
 - Optional: If you have any npm dependencies, you may need to run `npm install` on the device.  You'll need to [ssh](https://en.wikipedia.org/wiki/Secure_Shell) into the device and run the commands there in the game folder.
-- In the EmulationStation menu, navigate Game Settings menu and update the games list.
+- In the EmulationStation menu, navigate to the Game Settings menu and update the games list.
 - Play your game!
 
 Contributions and feedback are welcome!
