@@ -24,6 +24,8 @@ export function createCanvas(width, height) {
         if (image) {
           if (image._imgImpl) {
             return baseCreatePattern(image._imgImpl, type);
+          } else {
+            return baseCreatePattern(image, type);
           }
         }
       };
