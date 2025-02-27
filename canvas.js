@@ -10,12 +10,22 @@ export function createCanvas(width, height) {
     if (!ctx) {
       ctx = baseGetContext(type);
       const baseDrawImage = ctx.drawImage.bind(ctx);
+      const baseCreatePattern = ctx.createPattern.bind(ctx);
       ctx.drawImage = (image, ...args) => {
         if (image) {
           if (image._imgImpl) {
             baseDrawImage(image._imgImpl, ...args);
           } else {
             baseDrawImage(image, ...args);
+          }
+        }
+      };
+      ctx.createPattern = (image, type) => {
+        if (image) {
+          if (image._imgImpl) {
+            return baseCreatePattern(image._imgImpl, type);
+          } else {
+            return baseCreatePattern(image, type);
           }
         }
       };
