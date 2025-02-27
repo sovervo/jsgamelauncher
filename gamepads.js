@@ -321,6 +321,7 @@ export async function initGamepads(addtionalControllerListFile) {
       guid: device.guid,
       mapping: 'standard',
       axes: Array(6).fill(0),
+      connected: true,
       buttons: Array(17).fill(0).map(() => {
         return {pressed: false, value: 0}
       }),
