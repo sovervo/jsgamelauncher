@@ -186,7 +186,7 @@ For example games and demos compatible with jsgamelauncher, check out the [jsgam
 - Run `npm install`
 - Run `npm run dev`
 - Open your browser and navigate to the url it gives you.
-- Prompt your AI with the `src/main.js`, `src/utils.js` and `index.html` file and describe the game you want to make.
+- Prompt your AI with the `src/main.js` and `src/utils.js` files and describe the game you want to make.
 - The AI will update the javascript files with the code you need to make the game.
 - Play your new game!
 
