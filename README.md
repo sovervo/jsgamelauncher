@@ -4,9 +4,9 @@
 
 A compatibility layer for JavaScript games to run WITHOUT a browser or electron using standard web APIs.
 
-The goal is to run games on cheap ($50) retro devices (or even not so cheap ones as long as they run Linux . . . for now!) that will also run in browsers without any changes.
+The goal is to run games on cheap ($50) retro devices (or even not so cheap ones as long as they run Linux . . . for now!) that will also run in browsers without any changes. Real cross-platform!
 
-Right now we have support for anything that runs [Knulli](https://knulli.org/) and has wifi (so Ambernic XX devices and TrimUI Smart Pro) as well as [Batocera](https://batocera.org/) (which can just be a old PC, a Raspberry Pi, or a ton of other handheld devices) or [ROCKNIX](https://rocknix.org/) which has a long list of supported devices. We also have it running in [RetroBat](https://www.retrobat.org/) which is Batocera for Windows. It can be easily added to anything running Emulation Station using the instructions below but that's just the beginning.
+Right now we have support for anything that runs [Knulli](https://knulli.org/) and has wifi (so Ambernic XX devices and TrimUI Smart Pro) as well as [Batocera](https://batocera.org/) (which can just be a old PC, a Raspberry Pi, or a ton of other handheld devices) or [ROCKNIX](https://rocknix.org/) which has a long list of supported devices. We also have it running in [RetroBat](https://www.retrobat.org/) which is Batocera for Windows. It can be added to anything running [Emulation Station](https://emulationstation.org/) using the instructions below but we are just getting started.
 
 ### Browser APIs progress
 
@@ -22,6 +22,14 @@ Right now we have support for anything that runs [Knulli](https://knulli.org/) a
 - [ ] Peer Connection
 - [ ] WebGL (Canvas 3D)
 
+## Game making guidelines
+
+[How to make a game](./docs/developing-games.md)
+
+## Adding games to the launcher
+
+[Sample games / Demos / Starter projects](https://github.com/monteslu/jsgames)
+
 ## JS Game Engine support
 
 - [Phaser](https://phaser.io/)
@@ -29,12 +37,6 @@ Right now we have support for anything that runs [Knulli](https://knulli.org/) a
 3D effects are not supported, but you can use the canvas API to draw 3D graphics.
 
 Other engines might work, we just haven't tried them!
-
-## Adding games to the launcher
-
-[Sample games / Demos / Starter projects](https://github.com/monteslu/jsgames)
-
-[How to make a game](./docs/developing-games.md)
 
 ## Running on a desktop OS (Mac, Linux, even Windows!)
 
@@ -47,7 +49,9 @@ Other engines might work, we just haven't tried them!
 - use at least node 22
 - clone this repo, cd to this directory
 - npm install
-- `node index -rom /full/path/to/game.js` (clone sample game at https://github.com/monteslu/jsgames/tree/main/tuxgame or find other games at https://github.com/monteslu/jsgames)
+- `node index ./path/to/game.js` 
+- OR `npm link` . . . then `rungame ./gamename.jsg`
+- (clone sample game at https://github.com/monteslu/jsgames/tree/main/simple-vite or find other games at https://github.com/monteslu/jsgames)
 
 ### Use the web
 You can also just run the game directly without using jsgamelauncher. The goal is to make web games that also work on a low end device but the web is a first class citizen. Check out the [Simple Vite](https://github.com/monteslu/jsgames/tree/main/simple-vite) example. Most examples will run on the web with `npm run dev`.
