@@ -233,11 +233,14 @@ if (!gameFile) {
   }
 }
 
-
-console.log('gameFile', gameFile);
 const romName = path.basename(romDir);
-console.log('gameFile', gameFile, 'romDir', romDir, 'romName', romName);
-
+globalThis._jsg.rom = {
+  romName,
+  romDir,
+  gameFile,
+};
+console.log('globalThis._jsg.rom', globalThis._jsg.rom);
+globalThis.HTMLCanvasElement = nrsc.Canvas;
 if (fs.existsSync(path.join(romDir, 'node_modules'))) {
   Module.globalPaths.push(path.join(romDir, 'node_modules'));
   // console.log(Module.globalPaths);
