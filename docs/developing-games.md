@@ -150,7 +150,7 @@ to test out a gamepad and see how the buttons are mapped, you can use the follow
 
 ## Reading Input without a gamepad
 
-For local development without a gamepad you can use a keyboard abstraction such as [utils.js](https://github.com/monteslu/simple-jsgame-starter/blob/main/src/utils.js)
+For local development without a gamepad you can use a keyboard abstraction such as [utils.js](https://github.com/monteslu/simple-jsgame-starter/blob/master/src/utils.js)
 
 ```js
 import { getInput } from "./utils.js";
